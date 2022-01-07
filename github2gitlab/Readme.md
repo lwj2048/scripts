@@ -1,16 +1,16 @@
-#此脚本实现gitlab仓库与github仓库的对齐
+# 此脚本实现gitlab仓库与github仓库的对齐
 
-###前提条件：
+### 前提条件：
 
 github仓库状态是Public且有master分支
 gitlab_user用户具有创建分支权限
-###使用说明：
+### 使用说明：
 
-此脚本需要访问github，所以使用时需保证网络通畅。集群内可使用/mnt/lustre/share/git
+此脚本需要访问github，所以使用时需保证网络通畅。
 脚本支持多个仓库对其，只需要配置repository的值和对应的参数值即可
 同步后不支持在gitlab对应的master-opensource分支做修改
 
-###参数解释：
+### 参数解释：
 
 gitlab_dir //拉取github仓库所存放的地方
 gitlab_user //gitlab用户

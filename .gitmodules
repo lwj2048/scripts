@@ -1,0 +1,3 @@
+[submodule "doubi_shell"]
+	path = doubi_shell
+	url = git@github.com:xiaobing-123/doubi_shell.git

@@ -108,12 +108,8 @@ function set_source_centos(){
     if  [[ $centos_version_main == "7" ]]; then
         # Base源
         # curl -s -o /etc/yum.repos.d/CentOS-Base.repo $url_resource/repos/centos/7/CentOS-Base_ustc.repo
-        curl -s -o /etc/yum.repos.d/CentOS-Base.repo $url_resource/repos/centos/7/CentOS-Base_tuna.repo
+        #curl -s -o /etc/yum.repos.d/CentOS-Base.repo $url_resource/repos/centos/7/CentOS-Base_tuna.repo
         # curl -s -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-        # epel源
-        yum install -y epel-release
-        curl -s -o /etc/yum.repos.d/epel.repo $url_resource/repos/epel/7/epel_tuna.repo
-        # curl -s -o /etc/yum.repos.d/epel.repo $url_resource/repos/epel/7/epel_aliyun.repo
         # 以下为科大源
         # sed -e 's!^mirrorlist=!#mirrorlist=!g' \
         #     -e 's!^#baseurl=!baseurl=!g' \
@@ -121,19 +117,25 @@ function set_source_centos(){
         #     -e 's!http://mirrors\.ustc!https://mirrors.ustc!g' \
         #     -i /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo 
         # 阿里云源
-        # curl -s -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+        #wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+        curl -s -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
         # docker源
+        yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
         # curl -s -o /etc/yum.repos.d/docker.repo $url_resource/repos/docker/7/docker_ustc.repo
         # mysql源，临时屏蔽，科大源又出问题了。
         # rpm -Uvh https://mirrors.ustc.edu.cn/mysql-repo/yum/mysql-5.7-community/el/7/x86_64/mysql-community-release-el7-7.noarch.rpm
         # curl -s -o /etc/yum.repos.d/mysql-community.repo $url_resource/repos/mysql/mysql-community_ustc_tmp1.repo
         # postgresql源
         # 改成从清华站下载安装
-        rpm -Uvh https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
-        curl -s -o /etc/yum.repos.d/pgdg-96-centos.repo $url_resource/repos/postgresql/pgdg-96-centos_tuna.repo
+        #rpm -Uvh https://mirrors.tuna.tsinghua.edu.cn/postgresql/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+        #curl -s -o /etc/yum.repos.d/pgdg-96-centos.repo $url_resource/repos/postgresql/pgdg-96-centos_tuna.repo
         # zabbix源，临时屏蔽，阿里源也出问题了。
         # rpm -Uvh https://mirrors.aliyun.com/zabbix/zabbix/3.2/rhel/7/x86_64/zabbix-release-3.2-1.el7.noarch.rpm
         # curl -s -o /etc/yum.repos.d/zabbix.repo $url_resource/repos/zabbix/7/3.2/zabbix_aliyun.repo
+        # epel源
+        yum install -y epel-release
+        #curl -s -o /etc/yum.repos.d/epel.repo $url_resource/repos/epel/7/epel_tuna.repo
+        # curl -s -o /etc/yum.repos.d/epel.repo $url_resource/repos/epel/7/epel_aliyun.repo
     elif [[ $centos_version_main == "6" ]]; then
         # base
         curl -s -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo

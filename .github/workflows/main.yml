@@ -34,4 +34,6 @@ jobs:
       - name: Run 2
         run: |
           #echo Add other actions to build,
+          pwd
+          ls -l
           echo test, and deploy your project.

@@ -51,7 +51,7 @@ jobs:
       run: |
         from github import Github
 
-        token = ${{ secrets.GITHUB_TOKEN }}
+        token = ${{ secrets.TOKEN }}
         g = Github(token)
         repo = g.get_repo('xiaobing-123/xiaobing-script')
         workflow_runs = repo.get_workflow_runs()

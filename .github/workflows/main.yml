@@ -18,9 +18,6 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    - name: Run Tests
-      run: npm test
-
     - name: Generate Coverage Report
       run: npm run coverage
 

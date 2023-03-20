@@ -1,39 +1,84 @@
-# name 标识一下这个 ci 文件名称，纯语义化的项，没有配置意义
-name: xiaobing-script
+name: Test and Coverage Report
 
-# on 配置项用于配置该仓库的什么分支触发什么事件后进行该 ci 的调用
-on:
-  # master 分支 push 后触发
-  push:
-    branches: [ main ]
-  # master 分支 pull_request 后触发
-  pull_request:
-    branches: [ main ]
+on: push
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# jobs是一个功能脚本的维度集合。比如配置检测库语法，发布库，可以作为两个工作(job)。一个yml文件可以运行多个job。
 jobs:
-  # 一个jobs拥有 setup / build / test 的秩序执行单元。这个维度大于 steps 小于 jobs。
-  build:
-    # 该操作跑在什么环境之下，支持 Ubuntu/Windows/macOS。
+  test:
     runs-on: ubuntu-latest
 
-    # step 标识一系列按续执行的最小工作单元
     steps:
-      # uses 标识使用创建好的功能脚本，actions/ 标识了这是github公开的脚本库
-      # 这里使用了一个名为 checkout@v2 的脚本文件。
-      #- uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      # 运行单个的 shell
-      - name: Run 1
-        run: echo Hello, world!
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-      # 运行多个 shell
-      - name: Run 2
-        run: |
-          #echo Add other actions to build,
-          pwd
-          ls -l
-          echo test, and deploy your project.
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Tests
+      run: npm test
+
+    - name: Generate Coverage Report
+      run: npm run coverage
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: coverage/lcov-report
+
+  report:
+    runs-on: ubuntu-latest
+
+    needs: test
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install Dependencies
+      run: pip install PyGithub
+
+    - name: Generate Test Coverage Report
+      run: |
+        from github import Github
+
+        token = ${{ secrets.GITHUB_TOKEN }}
+        g = Github(token)
+        repo = g.get_repo('xiaobing-123/xiaobing-script')
+        workflow_runs = repo.get_workflow_runs()
+        report = []
+
+        for run in workflow_runs:
+            artifacts = run.get_artifacts()
+            for artifact in artifacts:
+                if artifact.name == 'coverage-report':
+                    coverage_path = artifact.archive_download_url
+                    # download and parse the coverage report
+                    # add coverage data to report
+
+        # generate report as JSON
+        report_json = json.dumps(report)
+
+        # write report to file
+        with open('report.json', 'w') as f:
+            f.write(report_json)
+
+    - name: Generate Coverage Report Chart
+      run: |
+        pip install matplotlib
+        python generate_chart.py
+
+    - name: Upload Coverage Report Chart
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-chart
+        path: coverage.png

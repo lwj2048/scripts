@@ -7,9 +7,9 @@ from datetime import datetime
 
 max_retries = 3  # 最大重试次数
 retry_delay = 10  # 重试延迟时间（秒）
-token = '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'
+token = 'xxxxxxxxxxxxxxxxxx'
 api_url = "https://api.github.com"
-owners = ['ParrotsDL','OpenComputeLab']
+owners = ['Test1','Test2']
 
 headers = {
     "Accept": "application/vnd.github.v3+json",

@@ -4,9 +4,9 @@ import sys
 max_retries = 3  # 最大重试次数
 retry_delay = 10  # 重试延迟时间（秒）
 api_url = "https://api.github.com"
-owner = "ParrotsDL"
-repo = "parrots"
-token = "ghp_1yhmAiuUzLxQxdmEbp2kZUYQtUgmy14LErv"
+owner = "test1"
+repo = "repo"
+token = "xxxxxxxxxxxxxx"
 headers = {
     "Accept": "application/vnd.github.v3+json",
     "Authorization": f"Bearer {token}"

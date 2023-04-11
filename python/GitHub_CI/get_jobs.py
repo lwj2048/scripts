@@ -8,10 +8,9 @@ import pymysql
 
 max_retries = 3  # 最大重试次数
 retry_delay = 10  # 重试延迟时间（秒）
-token = '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'
-# token = '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' #liwenjiantest
+token = 'xxxxxxxxxxxxxxxx'
 api_url = "https://api.github.com"
-owners = ['ParrotsDL','OpenComputeLab']
+owners = ['Test1','Test2']
 # owners = ['OpenComputeLab']
 headers = {
     "Accept": "application/vnd.github.v3+json",

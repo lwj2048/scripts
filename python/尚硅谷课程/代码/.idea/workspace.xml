@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e3860272-34a9-4ee9-8b39-d1ca77b90462" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1x4nOBRMMRkkcsoEEMHD0nuAqbF" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\lijingAction\Desktop\尚硅谷爬虫视频录制\python爬虫\代码\Python爬虫" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.test">
+    <configuration name="067_尚硅谷_爬虫_urllib_代理" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python爬虫" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/067_尚硅谷_爬虫_urllib_代理.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="087_尚硅谷_爬虫_requests_代理" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python爬虫" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/087_尚硅谷_爬虫_requests_代理.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="088_尚硅谷_爬虫_requests_cookie登陆古诗文网" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python爬虫" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/088_尚硅谷_爬虫_requests_cookie登陆古诗文网.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="089_尚硅谷_爬虫_requests_超级鹰打码平台的使用" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python爬虫" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="C:\Users\lijingAction\Desktop\尚硅谷爬虫视频录制\python爬虫\代码\Python爬虫\089_尚硅谷_爬虫_requests_超级鹰打码平台的使用.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python爬虫" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.087_尚硅谷_爬虫_requests_代理" />
+        <item itemvalue="Python.067_尚硅谷_爬虫_urllib_代理" />
+        <item itemvalue="Python.089_尚硅谷_爬虫_requests_超级鹰打码平台的使用" />
+        <item itemvalue="Python.088_尚硅谷_爬虫_requests_cookie登陆古诗文网" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e3860272-34a9-4ee9-8b39-d1ca77b90462" name="Default Changelist" comment="" />
+      <created>1629623193251</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1629623193251</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="396" y="209" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1630035063319">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state x="396" y="209" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630035063319" />
+    <state x="403" y="150" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1630082693356">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state x="403" y="150" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630082693356" />
+    <state width="1345" height="159" key="GridCell.Tab.0.bottom" timestamp="1630085528949">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state width="1323" height="159" key="GridCell.Tab.0.bottom/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630084397303" />
+    <state width="1323" height="240" key="GridCell.Tab.0.bottom/0.0.1344.800@0.0.1344.800" timestamp="1629898296289" />
+    <state width="1345" height="159" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1630085528949" />
+    <state width="1345" height="159" key="GridCell.Tab.0.center" timestamp="1630085528949">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state width="1323" height="159" key="GridCell.Tab.0.center/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630084397302" />
+    <state width="1323" height="240" key="GridCell.Tab.0.center/0.0.1344.800@0.0.1344.800" timestamp="1629898296289" />
+    <state width="1345" height="159" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1630085528949" />
+    <state width="1345" height="159" key="GridCell.Tab.0.left" timestamp="1630085528949">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state width="1323" height="159" key="GridCell.Tab.0.left/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630084397302" />
+    <state width="1323" height="240" key="GridCell.Tab.0.left/0.0.1344.800@0.0.1344.800" timestamp="1629898296289" />
+    <state width="1345" height="159" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1630085528949" />
+    <state width="1345" height="159" key="GridCell.Tab.0.right" timestamp="1630085528949">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state width="1323" height="159" key="GridCell.Tab.0.right/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630084397302" />
+    <state width="1323" height="240" key="GridCell.Tab.0.right/0.0.1344.800@0.0.1344.800" timestamp="1629898296289" />
+    <state width="1345" height="159" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1630085528949" />
+    <state width="1323" height="252" key="GridCell.Tab.1.bottom" timestamp="1629879660770">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state width="1323" height="252" key="GridCell.Tab.1.bottom/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1629879660770" />
+    <state width="1323" height="252" key="GridCell.Tab.1.center" timestamp="1629879660770">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state width="1323" height="252" key="GridCell.Tab.1.center/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1629879660770" />
+    <state width="1323" height="252" key="GridCell.Tab.1.left" timestamp="1629879660770">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state width="1323" height="252" key="GridCell.Tab.1.left/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1629879660770" />
+    <state width="1323" height="252" key="GridCell.Tab.1.right" timestamp="1629879660770">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state width="1323" height="252" key="GridCell.Tab.1.right/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1629879660770" />
+    <state x="176" y="46" key="SettingsEditor" timestamp="1630033024568">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state x="176" y="46" key="SettingsEditor/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630033024568" />
+    <state x="365" y="229" key="com.intellij.ide.util.TipDialog" timestamp="1630073239673">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state x="365" y="229" key="com.intellij.ide.util.TipDialog/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1630073239673" />
+    <state x="365" y="229" key="com.intellij.ide.util.TipDialog/0.0.1344.800@0.0.1344.800" timestamp="1629896989106" />
+    <state x="335" y="121" width="672" height="678" key="search.everywhere.popup" timestamp="1629718812378">
+      <screen x="0" y="0" width="1344" height="800" />
+    </state>
+    <state x="335" y="121" width="672" height="678" key="search.everywhere.popup/0.0.1344.800/1680.0.1680.1010@0.0.1344.800" timestamp="1629718812378" />
+  </component>
+</project>

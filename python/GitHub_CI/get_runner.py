@@ -88,6 +88,14 @@ def clean_table(TABLE):
     cursor = db.cursor()
     cursor.execute(CLEAN_sql)
     db.commit()
+def clean_now_data():
+    db = pymysql.connect(host='sh.paas.xxx.com', user='github', password='GitHub123', charset='utf8',
+                         db='GitHub', port=38152)
+
+    CLEAN_sql = "DELETE from GitHub_runners WHERE datetime = %s "
+    cursor = db.cursor()
+    cursor.execute(CLEAN_sql, (now))
+    db.commit()
 def get_repo(owner):
     repo_url = f"{api_url}/orgs/{owner}/repos"
     repo_response = requests.get(repo_url, headers=headers)
@@ -171,5 +179,6 @@ for i in range(max_retries):
             print(retry_delay)
             break
         print("Retrying in {} seconds...".format(retry_delay))
+        clean_now_data()
         time.sleep(retry_delay)
 

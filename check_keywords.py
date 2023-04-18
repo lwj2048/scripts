@@ -2,7 +2,7 @@ import os
 import sys
 
 # 要检查的关键字列表
-KEYWORDS = ['sensetime', 'time']
+KEYWORDS = ['sensetime', 'sensecore', 'SenseTime']
 
 def check_file(filename):
     with open(filename, 'r') as f:

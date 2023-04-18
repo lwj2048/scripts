@@ -17,8 +17,8 @@ TABLE_TMPL = """
 
 def sendMail(title,emailto,emailcc):
     host = 'partner.outlook.cn'
-    sender = 'research.platformci@sensetime.com'
-    user = r'research.platformci@sensetime.com'
+    sender = 'research.platformci@xxxx.com'
+    user = r'research.platformci@xxxx.com'
     password = 'CmWR$pdOstQNv6wloAAQ'
     to = [emailto]
     cc = [emailcc]
@@ -78,8 +78,8 @@ def sendMail(title,emailto,emailcc):
 if __name__ == '__main__':
     # content,user=sys.argv[1:3]
     # emailto = user + "@sensetime.com"
-    emailto="liwenjian.vendor@sensetime.com"
-    emailcc="liwenjian.vendor@sensetime.com"
+    emailto="liwenjian.vendor@xxxx.com"
+    emailcc="liwenjian.vendor@xxxx.com"
     cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     value="当前时间："+cur_time
     sendMail("运维月报",emailto,emailcc)

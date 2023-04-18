@@ -77,7 +77,7 @@ def sendMail(title,emailto,emailcc):
 
 if __name__ == '__main__':
     # content,user=sys.argv[1:3]
-    # emailto = user + "@sensetime.com"
+    # emailto = user + "@xxxx.com"
     emailto="liwenjian.vendor@xxxx.com"
     emailcc="liwenjian.vendor@xxxx.com"
     cur_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())

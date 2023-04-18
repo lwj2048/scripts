@@ -5,7 +5,7 @@ import time
 #import re
 #变量初始化
 con=pymysql.connect(
-    host='sh.paas.sensetime.com',
+    host='sh.paas.xxx.com',
     port=38152,
     user='kkcycanr',
     password='zwikygxd',

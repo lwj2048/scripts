@@ -68,7 +68,7 @@ if __name__ == '__main__':
     # 定义采集时间间隔 s
     monitorInterval = 10
     # 定义Prometheus地址
-    address = "http://ci.parrots.sensetime.com:8002"
+    address = "http://ci.parrots.xxxx.com:8002"
     #address = "http://10.118.253.11:30003"
     #初次运行时间
     gather_time = time.strftime('%Y-%m-%d_%H', time.localtime())

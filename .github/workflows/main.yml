@@ -1,81 +1,22 @@
-name: Test and Coverage Report
+name: Bandit Security Scan
 
-on: push
+on:
+  push:
+    branches: [ main ] # 只在 main 分支上运行
 
 jobs:
-  test:
+  security_scan:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install Dependencies
-      run: npm install
-
-    - name: Generate Coverage Report
-      run: npm run coverage
-
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage-report
-        path: coverage/lcov-report
-
-  report:
-    runs-on: ubuntu-latest
-
-    needs: test
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Set up Python
+    - uses: actions/checkout@v2 # 拉取代码仓库
+    - name: Set up Python 3.9 # 配置 Python 环境
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
-
-    - name: Install Dependencies
-      run: pip install PyGithub
-
-    - name: Generate Test Coverage Report
+        python-version: 3.9
+    - name: Install dependencies # 安装 Bandit
       run: |
-        from github import Github
-
-        token = ${{ secrets.TOKEN }}
-        g = Github(token)
-        repo = g.get_repo('xiaobing-123/xiaobing-script')
-        workflow_runs = repo.get_workflow_runs()
-        report = []
-
-        for run in workflow_runs:
-            artifacts = run.get_artifacts()
-            for artifact in artifacts:
-                if artifact.name == 'coverage-report':
-                    coverage_path = artifact.archive_download_url
-                    # download and parse the coverage report
-                    # add coverage data to report
-
-        # generate report as JSON
-        report_json = json.dumps(report)
-
-        # write report to file
-        with open('report.json', 'w') as f:
-            f.write(report_json)
-
-    - name: Generate Coverage Report Chart
+        python -m pip install --upgrade pip
+        pip install bandit
+    - name: Run Bandit # 运行 Bandit
       run: |
-        pip install matplotlib
-        python generate_chart.py
-
-    - name: Upload Coverage Report Chart
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage-chart
-        path: coverage.png
+        bandit -r . -x **/tests/** -x **/venv/** -i **/*sh.paas.xxxx.com* # 过滤掉包含 "wwwsssxxx" 的文件

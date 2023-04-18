@@ -1,22 +1,25 @@
-name: Bandit Security Scan
+name: Check Keywords
 
 on:
   push:
-    branches: [ main ] # 只在 main 分支上运行
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  security_scan:
+  check_keywords:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2 # 拉取代码仓库
-    - name: Set up Python 3.9 # 配置 Python 环境
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install dependencies # 安装 Bandit
-      run: |
-        python -m pip install --upgrade pip
-        pip install bandit
-    - name: Run Bandit # 运行 Bandit
-      run: |
-        bandit -r .  -x python/ShangGuiGu --exclude "**/*wwwsssxqwertyuioasdfghjklxx*" -s B101 --quiet
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run keyword check
+        run: python check_keywords.py

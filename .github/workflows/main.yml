@@ -19,4 +19,4 @@ jobs:
           python-version: 3.9
 
       - name: Run keyword check
-        run: find . -name '*.py' -not -name 'check_keywords.py' -print0 | xargs -0 python check_keywords.py
+        run: python check_keywords.py

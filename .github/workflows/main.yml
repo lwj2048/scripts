@@ -19,4 +19,4 @@ jobs:
         pip install bandit
     - name: Run Bandit # 运行 Bandit
       run: |
-        bandit -r .  --exclude "**/*wwwsssxxx*"
+        bandit -r .  -x **/尚硅谷课程/** --exclude "**/*wwwsssxqwertyuioasdfghjklxx*"

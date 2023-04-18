@@ -19,4 +19,4 @@ jobs:
         pip install bandit
     - name: Run Bandit # 运行 Bandit
       run: |
-        bandit -r . -x **/tests/** -x **/venv/** -i **/*sh.paas.xxxx.com* # 过滤掉包含 "wwwsssxxx" 的文件
+        bandit -r . -x **/tests/** -x **/venv/** -n "*wwwsssxxx*"

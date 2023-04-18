@@ -72,7 +72,7 @@ def insert_Mysql_queued(owner,runner_label):
     select_queued_query = "SELECT runner_queued FROM GitHub_runners WHERE owner = %s AND runner_label = %s "
     cursor.execute(select_queued_query, (owner, runner_label))
     runner_queued = cursor.fetchone()
-    if runner_queued[0] is None:
+    if runner_queued is None or runner_queued[0] == 0:
         runner_queued = 1
     else:
         runner_queued = int(runner_queued[0]) + 1

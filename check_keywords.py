@@ -1,7 +1,8 @@
 import os
+import sys
 
 # 要检查的关键字列表
-KEYWORDS = ['wwwsssxxx', 'other_keyword']
+KEYWORDS = ['sensetime', 'time']
 
 def check_file(filename):
     with open(filename, 'r') as f:
@@ -10,6 +11,7 @@ def check_file(filename):
             for keyword in KEYWORDS:
                 if keyword in line:
                     print(f'Error: {keyword} found in {filename}, line {i+1}')
+                    sys.exit(1)
 
 def check_dir(dirname):
     for root, dirs, files in os.walk(dirname):

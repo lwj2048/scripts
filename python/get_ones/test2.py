@@ -29,6 +29,3 @@ tasks_paylodData = {
 }
 tasks_response = requests.post(url=tasks_url, headers=headers, data=json.dumps(tasks_paylodData))
 print(tasks_response.json())
-
-http://parrots-dl.oss-cn-shanghai.aliyuncs.com/whl/kestrel-1.5.4-py3-none-any.whl?OSSAccessKeyId=LTAI5tH5QXXmPfDngVKnyid7&Expires=9876544889835202&Signature=xKdXxM9nN1eKc2XOvS%2BpAtnnDeo%3D
-http://parrots-dl.oss-cn-shanghai.aliyuncs.com/whl/kestrel-1.5.4-py3-none-any.whl?OSSAccessKeyId=LTAI5tH5QXXmPfDngVKnyid7&Expires=1677493005&Signature=daQLFTEbQ5PPMsecJzX5CZyMFMs%3D

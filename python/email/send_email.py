@@ -25,7 +25,7 @@ HTML_TOP = """
     <h2 align="center">date</h2>
   <table border="1">
   <tr>
-    <td colspan="9" align="center" height="100px" ><strong>SenseParrots CI WorkFlow信息</strong></td>
+    <td colspan="9" align="center" height="100px" ><strong>xxxParrots CI WorkFlow信息</strong></td>
   </tr>
   <tr>
     <td colspan="9">
@@ -33,7 +33,7 @@ HTML_TOP = """
     </td>
   </tr>
   <tr>
-    <td colspan="9" align="center" height="200px" ><strong>SenseParrots CI job 汇总</strong></td>
+    <td colspan="9" align="center" height="200px" ><strong>xxxParrots CI job 汇总</strong></td>
   </tr>
   <tr>
     <td colspan="9">

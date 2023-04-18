@@ -14,7 +14,9 @@ def check_file(filename):
 def check_dir(dirname):
     for root, dirs, files in os.walk(dirname):
         for filename in files:
-            if filename.endswith('.py'):
+            if filename == 'check_keywords.py':
+                continue
+            else:
                 check_file(os.path.join(root, filename))
 
 if __name__ == '__main__':

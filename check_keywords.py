@@ -1,7 +1,7 @@
 import os
 import sys
 
-KEYWORDS = ["bequgexs", "SecretKey"]  # 需要检查的关键字列表
+KEYWORDS = ["SecretKey0123456789", "SecretKey"]  # 需要检查的关键字列表
 
 
 def is_text_file(file_path):

@@ -1,29 +1,47 @@
-import sys
 import os
+import sys
 
-KEYWORDS = ["phantomjs.exe", "another_keyword"]
+KEYWORDS = ["sense", "phantomjs.exe", "keyword3"]  # 需要检查的关键字列表
 
 
-def check_file(file_path):
-    _, filename = os.path.split(file_path)
-    if filename == 'check_keywords.py':
-        return
-    if filename.endswith('.py'):
-        print(filename)
-        # 如果是 Python 文件，则使用 Python 解释器执行文件以检查关键字
+def is_text_file(file_path):
+    """
+    判断文件是否为文本文件
+    """
+    try:
+        with open(file_path, 'rb') as f:
+            f.read(1024)
+        return True
+    except:
+        return False
+
+
+def search_keyword(file_path, keywords):
+    """
+    在指定文件中搜索关键字
+    """
+    try:
         with open(file_path, "r") as f:
-            file_contents = f.read()
-        for keyword in KEYWORDS:
-            if keyword in file_contents:
-                print(f"{file_path}: {keyword} found!")
-    else:
-        # 如果不是 Python 文件，则直接使用 grep 命令检查关键字
-        cmd = f"grep -q {'|'.join(KEYWORDS)} {file_path}"
-        return_code = os.system(cmd)
-        if return_code == 0:
-            print(f"{file_path}: {' or '.join(KEYWORDS)} found!")
+            content = f.read()
+        for keyword in keywords:
+            if keyword in content:
+                print(f"文件 {file_path} 中包含关键字：{keyword}")
+                sys.exit(1)
+    except UnicodeDecodeError:
+        pass
+
+
+def search_directory(directory, keywords):
+    """
+    在指定目录及其子目录下搜索关键字
+    """
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if is_text_file(file_path):
+                search_keyword(file_path, keywords)
 
 
 if __name__ == "__main__":
-    file_path = sys.argv[1]
-    check_file(file_path)
+    search_directory(".", KEYWORDS)  # 搜索当前目录下所有文件中的关键字
+

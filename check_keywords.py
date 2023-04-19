@@ -2,7 +2,7 @@ import os
 import sys
 
 
-KEYWORDS = ["secretkey"]
+KEYWORDS = ["sensetime", "sensecore", 'senseparrots']  # 需要检查的关键字列表
 
 def is_text_file(file_path):
     """

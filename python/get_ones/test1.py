@@ -47,7 +47,7 @@ def sendMail(title,emailto,emailcc):
     msgText = MIMEText(mail_body, _subtype='html', _charset='utf-8')
     msg.attach(msgText)
 
-    #添加SenseParrots CI图片
+    #添加 CI图片
     file = open("D:\python\/test\get_web_grafana\examplegrafana.png", "rb")
     img_data = file.read()
     file.close()

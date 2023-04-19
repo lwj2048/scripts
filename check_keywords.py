@@ -1,7 +1,7 @@
 import os
 import sys
 
-KEYWORDS = ["sense", "phantomjs.exe", "keyword3"]  # 需要检查的关键字列表
+KEYWORDS = ["bequgexs", "SecretKey"]  # 需要检查的关键字列表
 
 
 def is_text_file(file_path):
@@ -22,6 +22,7 @@ def search_keyword(file_path, keywords):
     """
     try:
         with open(file_path, "r") as f:
+            print(file_path)
             content = f.read()
         for keyword in keywords:
             if keyword in content:
@@ -38,7 +39,7 @@ def search_directory(directory, keywords):
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
-            if is_text_file(file_path):
+            if not os.path.basename(file_path) == 'check_keywords.py' and is_text_file(file_path):
                 search_keyword(file_path, keywords)
 
 

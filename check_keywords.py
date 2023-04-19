@@ -5,9 +5,11 @@ KEYWORDS = ["phantomjs.exe", "another_keyword"]
 
 
 def check_file(file_path):
-    _, extension = os.path.splitext(file_path)
-
-    if extension == ".py":
+    _, filename = os.path.split(file_path)
+    if filename == 'check_keywords.py':
+        return
+    if filename.endswith('.py'):
+        print(filename)
         # 如果是 Python 文件，则使用 Python 解释器执行文件以检查关键字
         with open(file_path, "r") as f:
             file_contents = f.read()

@@ -1,8 +1,8 @@
 import os
 import sys
 
-KEYWORDS = ["SecretKey0123456789", "SecretKey"]  # 需要检查的关键字列表
 
+KEYWORDS = ["secretkey"]
 
 def is_text_file(file_path):
     """
@@ -25,7 +25,7 @@ def search_keyword(file_path, keywords):
             print(file_path)
             content = f.read()
         for keyword in keywords:
-            if keyword in content:
+            if keyword in content.lower():
                 print(f"文件 {file_path} 中包含关键字：{keyword}")
                 sys.exit(1)
     except UnicodeDecodeError:

@@ -30,6 +30,6 @@ async def save_image(url, img_path):
 
 if __name__ == '__main__':
     url = "https://blog.csdn.net/Longyu_wlz/article/details/108550528"
-    img_path = os.path.join(os.getcwd(), "../../../monthly/examplemetabase.png")
+    img_path = os.path.join(os.getcwd(), "../../../monthly/get_web_matebase/examplemetabase.png")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(save_image(url, img_path))

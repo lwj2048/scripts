@@ -87,14 +87,14 @@ def sendmail(HOST, SUBJECT,FROM,TO,message):
     message.attach(message_html)
     # ===========发送图片-=============
     #发送图片-预览信息
-    image_data = open('../../../../monthly/examplemetabase.png', 'rb')
+    image_data = open('../../../../monthly/get_web_matebase/examplemetabase.png', 'rb')
     message_image = MIMEImage(image_data.read())
     image_data.close()# 关闭刚才打开的文件
     message_image.add_header('Content-ID', 'small')
     message.attach(message_image)# 添加图片文件到邮件信息中去
 
     #发送图片-附件
-    message_image = MIMEText(open('../../../../monthly/examplemetabase.png', 'rb').read(), 'base64', 'utf-8')
+    message_image = MIMEText(open('../../../../monthly/get_web_matebase/examplemetabase.png', 'rb').read(), 'base64', 'utf-8')
     message_image['Content-disposition'] = 'attachment;filename="1234.png"'# 设置图片在附件当中的名字
     message.attach(message_image)# 添加图片文件到邮件-附件中去
     # ===========发送excel-附件=============

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>文档标题</title>
+</head>
+<body>
+        <h1 align="center">运维月度信息统计</h1>
+    <h2 align="center">${date}</h2>
+  <table border="1">
+  <tr>
+    <td colspan="9" align="center" ><strong>DeepLink-org组织下主要仓库 WorkFlow信息</strong></td>
+  </tr>
+  <tr>
+    <td colspan="9">
+      <img src="cid:DeeplinkGrafana" alt="dns配置">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="9" align="center" ><strong>xxx CI WorkFlow信息</strong></td>
+  </tr>
+  <tr>
+    <td colspan="9">
+      <img src="cid:Grafana" alt="dns配置">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="9" align="center"  ><strong>xxx CI job 汇总</strong></td>
+  </tr>
+  <tr>
+    <td colspan="9">
+      <img src="cid:metabase" alt="dns配置">
+    </td>
+  </tr>
+     <tr>
+    <td colspan="9" align="center" ><strong>运维任务统计</strong></td>
+  </tr>
+      <tr>
+    <td >时间</td>
+    <td >状态</td>
+    <td >业务需求</td>
+    <td >研发需求</td>
+    <td >产品需求</td>
+    <td >商业化需求</td>
+    <td >实验室需求</td>
+    <td >新增完成</td>
+    <td >总需求</td>
+  </tr>
+  <tr>
+    <td >${date}</td>
+    <td >已完成</td>
+    <td >0</td>
+    <td >3</td>
+    <td >2</td>
+    <td >0</td>
+    <td >2</td>
+    <td ></td>
+    <td >7</td>
+  </tr>
+  <tr>
+    <td >${date}</td>
+    <td >新增</td>
+    <td >1</td>
+    <td >2</td>
+    <td >3</td>
+    <td >0</td>
+    <td >2</td>
+    <td >6</td>
+    <td >8</td>
+  </tr>
+</table>
+</body>
+</html>
+
+
+<!--todo: src 不是一个路径了，而是 cid:dns_config 这样的一个东西 -->

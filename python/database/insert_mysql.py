@@ -45,7 +45,10 @@ sql = "INSERT INTO `id` VALUES (%s, %s, %s, %s) " \
 #数据格式如下：
 #添加的数据的格式必须为list[tuple(),tuple(),tuple()]或者tuple(tuple(),tuple(),tuple())
 
-
+# sql = f"INSERT INTO get_ones_sum (status, {name}, NEW_success, DATE , `ALL`) " \    #若主键存在则更新name的值
+#       f"VALUES (%s, %s, %s, %s, %s) " \
+#       f"ON DUPLICATE KEY UPDATE {name} = %s"
+# cue.execute(sql, ["新增", number, NEW_success, prev_month_year, ALL, number])
 
 #批量插入使用executement
 print(source.data_info)

@@ -5,7 +5,7 @@ url = "https://ones.ainewera.com/project/api/project/auth/login"
 
 # JSON data to be sent in the request body
 data = {
-    "email": "research.platformci@sensetime.com",
+    "email": "research.platformci@xxxxxx.com",
     "password": "platformci123"
 }
 

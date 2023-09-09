@@ -9,40 +9,27 @@ from io import BytesIO
 
 
 # 用于为每个模型绘图的函数
-def plot_model(model_name, type):
-    if type == "time":
-        ylabel = 'Time (s)'
-        data_info = [
-            [float(data[env][gpu_count][model_name][type]) for env in environments] for gpu_count in gpu_counts
-        ]
-    elif type == "memory":
-        ylabel = 'Memory (M)'
-        data_info = [
-            [float(data[env][gpu_count][model_name][type]) for env in environments] for gpu_count in gpu_counts
-        ]
-    elif type == "throughput":
+def plot_model(env, type):
+    if type == "throughput":
         ylabel = 'Throughput (img/s)'
         # 计算吞吐量数据
         data_info = [
-            [(float(data[env][gpu_count][model_name]["batch_size"]) * int(gpu_count)) / float(data[env][gpu_count][model_name]["time"]) for env in environments] for gpu_count in gpu_counts
+            [(float(data[env][gpu_count][model_name]["batch_size"]) * int(gpu_count)) / float(data[env][gpu_count][model_name]["time"]) for model_name in model_names] for gpu_count in gpu_counts
         ]
-    print(data_info)
-    # num_environments = len(environments)
-    num_model_name = len(model_name)
-    num_gpu_configs = len(data_info)
+    print(data_info[1])
 
+    num_model_name = len(model_names)
+    num_gpu_configs = len(data_info)
     bar_width = 0.8 / num_gpu_configs
     index = np.arange(num_model_name)
-
     bars = []
     for i in range(num_gpu_configs):
         bars.append(plt.bar(index + i * bar_width, data_info[i], width=bar_width, label=f'{gpu_counts[i]} GPU(s)'))
-
-    plt.title(f'Average {type} ({model_name})')
-    plt.xlabel('Env')
+    plt.title(f'Average {type} ({env})')
+    plt.xlabel('model')
     plt.ylabel(ylabel)
-    plt.xticks(index + (bar_width * num_gpu_configs) / 2 - bar_width / 2, environments)
-
+    plt.xticks(index + (bar_width * num_gpu_configs) / 2 - bar_width / 2, model_names)
+    #
     plt.ylim(0, max([max(times) for times in data_info]) * 1.3)  # 增加 y 轴高度
     plt.legend()
 
@@ -61,9 +48,9 @@ def plot_model(model_name, type):
     im = Image.open(buf)
     plt.clf()
 
-    im_resized = im.resize((400, 300), Image.ANTIALIAS)  # 调整图像大小
+    im_resized = im.resize((400, 300), Image.LANCZOS)  # 调整图像大小
 
-    im_resized.save(f'image\{type}_{model_name}.png', 'PNG')  # 保存调整后的图像
+    im_resized.save(f'{type}_{env}.png', 'PNG')  # 保存调整后的图像
     buf.close()
 
 

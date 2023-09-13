@@ -15,5 +15,5 @@ jobs:
     
     - name: Rollback on failure
       run: |
-        echo "${{ steps.job_status.outputs }}"
+        for i in ${{ steps.job_status.outputs }};do echo $i ;done
      

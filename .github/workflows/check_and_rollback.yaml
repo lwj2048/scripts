@@ -12,7 +12,10 @@ jobs:
     - name: Check job status
       id: job_status
       run: echo "::set-output name=job_status::${{ github.event.workflow_run.conclusion }}" 
-    
+      
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
     - name: Rollback on failure
       if: steps.job_status.outputs.job_status == 'failure'  # 如果监测到特定作业失败
       run: |

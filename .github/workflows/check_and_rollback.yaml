@@ -20,7 +20,9 @@ jobs:
       if: steps.job_status.outputs.job_status == 'failure'  # 如果监测到特定作业失败
       run: |
         ls
-        sudo apt install git
+        sudo apt-get update -y
+        sudo apt-get upgrade -y
+        sudo apt-get install git -y
         # 回退代码的操作，例如使用 git reset 和 git push 强制推送
         git reset --hard HEAD~1
         git push -f origin main

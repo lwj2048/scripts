@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Check job status
       id: job_status
-      run: echo "Job Status:${{ github.event.workflow_run.status }}"
+      run: echo "Job Status:${{ github.event.workflow_run.conclusion }}"
     
     - name: Rollback on failure
       if: steps.job_status.outputs.job_status == 'failure'  # 如果监测到指定工作流程中的作业失败

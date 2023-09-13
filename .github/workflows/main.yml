@@ -23,6 +23,7 @@ jobs:
         
   to_gitee:
     runs-on: ubuntu-latest
+    needs: [check_keywords]
     steps:
       - name: Black list
         uses: Yikun/hub-mirror-action@master

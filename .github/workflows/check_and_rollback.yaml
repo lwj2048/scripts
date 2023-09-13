@@ -21,6 +21,7 @@ jobs:
       run: |
         ls
         # 回退代码的操作，例如使用 git reset 和 git push 强制推送
+        git log
         git reset --soft HEAD~1
         git push -f origin main
       env:

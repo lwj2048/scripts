@@ -27,4 +27,4 @@ jobs:
         git reset --soft HEAD~1
         git push -f origin main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 进行 Git 操作
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}  # 使用 GitHub Token 进行 Git 操作

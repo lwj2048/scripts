@@ -1,8 +1,8 @@
 on:
   workflow_run:
-    workflows: ["Check Keywords"]  # 监听指定的工作流程
+    workflows: ["Check Keywords"]
     types:
-      - completed  # 当工作流程完成时触发事件
+      - completed
 
 jobs:
   monitor_job:
@@ -11,20 +11,22 @@ jobs:
     steps:
     - name: Check job status
       id: job_status
-      run: echo "::set-output name=job_status::${{ github.event.workflow_run.conclusion }}" 
+      run: echo "::set-output name=job_status::${{ github.event.workflow_run.conclusion }}"
       
     - name: Checkout code
+      if: steps.job_status.outputs.job_status == 'failure'
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
       
     - name: Rollback on failure
-      if: steps.job_status.outputs.job_status == 'failure'  # 如果监测到特定作业失败
+      if: steps.job_status.outputs.job_status == 'failure'
       run: |
-        ls
-        # 回退代码的操作，例如使用 git reset 和 git push 强制推送
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@users.noreply.github.com"
+        git remote set-url origin https://x-access-token:${{ secrets.TOKEN }}@github.com/wj2048/scripts.git
+        git branch
+        git checkout main
         git log
-        git reset --soft HEAD~1
-        git push -f origin main
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}  # 使用 GitHub Token 进行 Git 操作
+        git reset --hard HEAD~1
+        git push --force

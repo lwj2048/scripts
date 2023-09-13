@@ -15,6 +15,8 @@ jobs:
       
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
       
     - name: Rollback on failure
       if: steps.job_status.outputs.job_status == 'failure'  # 如果监测到特定作业失败

@@ -22,10 +22,4 @@ jobs:
     - name: Rollback on failure
       if: steps.job_status.outputs.job_status == 'failure'
       run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@users.noreply.github.com"
-        git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/lwj2048/scripts.git
-        git branch
-        git checkout main
-        git reset --hard HEAD~1
-        git push --force
+        echo "Check Keywords error"  # 当main.yaml Check Keywords 结束后，并且结果为failure时触发

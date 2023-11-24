@@ -1,0 +1,25 @@
+on:
+  workflow_run:
+    workflows: ["Check Keywords"]
+    types:
+      - completed
+
+jobs:
+  monitor_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check job status
+      id: job_status
+      run: echo "::set-output name=job_status::${{ github.event.workflow_run.conclusion }}"
+      
+    - name: Checkout code
+      if: steps.job_status.outputs.job_status == 'failure'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+      
+    - name: Rollback on failure
+      if: steps.job_status.outputs.job_status == 'failure'
+      run: |
+        echo "Check Keywords error"  # 当main.yaml Check Keywords 结束后，并且结果为failure时触发

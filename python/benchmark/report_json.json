@@ -1,0 +1,74 @@
+{
+    "pt2.0v1": {
+        "2": {
+            "resnet": {
+                "time": "0.0245",
+                "memory": "573.0",
+                "batch_size": "2"
+            },
+            "yolov3": {
+                "time": "0.0546",
+                "memory": "1107.4",
+                "batch_size": "2"
+            },
+            "tsn": {
+                "time": "0.0400",
+                "memory": "882.0",
+                "batch_size": "2"
+            }
+        },
+        "4": {
+            "resnet": {
+                "time": "0.0245",
+                "memory": "573.0",
+                "batch_size": "2"
+            },
+            "yolov3": {
+                "time": "0.0546",
+                "memory": "1107.4",
+                "batch_size": "2"
+            },
+            "tsn": {
+                "time": "0.0400",
+                "memory": "882.0",
+                "batch_size": "2"
+            }
+        }
+    },
+    "dipu0.3.0": {
+        "2": {
+            "resnet": {
+                "time": "0.0766",
+                "memory": "419.0",
+                "batch_size": "2"
+            },
+            "yolov3": {
+                "time": "0.1650",
+                "memory": "1011.0",
+                "batch_size": "2"
+            },
+            "tsn": {
+                "time": "0.0870",
+                "memory": "723.0",
+                "batch_size": "2"
+            }
+        },
+        "4": {
+            "resnet": {
+                "time": "0.0766",
+                "memory": "419.0",
+                "batch_size": "2"
+            },
+            "yolov3": {
+                "time": "0.1650",
+                "memory": "1011.0",
+                "batch_size": "2"
+            },
+            "tsn": {
+                "time": "0.0870",
+                "memory": "723.0",
+                "batch_size": "2"
+            }
+        }
+    }
+}

@@ -21,7 +21,7 @@ mydb = mysql.connector.connect(
     host="xxxxx.com",
     port="38152",
     user='github',
-    password="GitHub123",
+    password="xxxx",
     database="GitHub",
     ssl_disabled=True
 )

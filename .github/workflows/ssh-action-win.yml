@@ -10,7 +10,7 @@ jobs:
       - name: 安装 SSH 服务器
         run: |
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
-          net user runneradmin passwd
+          net user runneradmin Passwd123.@
           Start-Service sshd
           Get-Service -Name sshd
           Set-Service -Name sshd -StartupType 'Automatic'

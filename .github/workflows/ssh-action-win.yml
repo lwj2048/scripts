@@ -11,13 +11,16 @@ jobs:
         run: |
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
           Start-Service sshd
+          Get-Service -Name sshd
           Set-Service -Name sshd -StartupType 'Automatic'
           New-Item -ItemType Directory -Path C:\Users\runneradmin\.ssh -Force
           Set-Content -Path C:\Users\runneradmin\.ssh\authorized_keys -Value "${{ secrets.ID_RSA_PUB }}"
           icacls "C:\Users\runneradmin\.ssh\authorized_keys" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F"
+          Get-Service -Name sshd
 
       - name: 安装 ngrok 并暴露 SSH 端口
         run: |
+          Get-Service -Name sshd
           Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile ngrok.zip
           Expand-Archive -Path ngrok.zip -DestinationPath C:\ngrok
           C:\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
@@ -26,7 +29,7 @@ jobs:
       - name: 获取 SSH 访问地址
         run: |
           Start-Sleep -Seconds 25
-          Get-Process -Name ngrok
+          tasklist | findstr /I "ngrok"
           Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels | ConvertTo-Json -Depth 10
           $ssh_address = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels | ConvertTo-Json -Depth 10
           $ssh_address = ($ssh_address.tunnels[0].public_url)

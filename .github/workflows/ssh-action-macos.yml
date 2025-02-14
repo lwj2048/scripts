@@ -7,24 +7,35 @@ jobs:
   start-ssh-server:
     runs-on: macos-latest
     steps:
-      - name: 安装 SSH 服务器
+      - name: 启用 SSH 远程登录
         run: |
-          brew install openssh
           sudo systemsetup -setremotelogin on
-          echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
-          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
-          sudo mkdir -p /root/.ssh
-          sudo chmod 700 /root/.ssh
-          echo "${{ secrets.ID_RSA_PUB }}" | sudo tee -a /root/.ssh/authorized_keys
-          sudo chmod 600 /root/.ssh/authorized_keys
-          sudo chown -R root:wheel /root/.ssh
+          sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
           sudo launchctl kickstart -k system/com.openssh.sshd
+          echo "✅ SSH 服务器已启动"
+
+      - name: 配置 SSH 允许 root 登录
+        run: |
+          sudo sh -c 'echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
+          sudo sh -c 'echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config'
+          sudo launchctl stop com.openssh.sshd
+          sudo launchctl start com.openssh.sshd
+          echo "✅ 已允许 Root 登录"
+
+      - name: 配置 SSH 公钥
+        run: |
+          mkdir -p /Users/runner/.ssh
+          chmod 700 /Users/runner/.ssh
+          echo "${{ secrets.ID_RSA_PUB }}" >> /Users/runner/.ssh/authorized_keys
+          chmod 600 /Users/runner/.ssh/authorized_keys
+          echo "✅ SSH 公钥已添加"
 
       - name: 安装 ngrok 并暴露 SSH 端口
         run: |
           brew install ngrok/ngrok/ngrok
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
           nohup ngrok tcp 22 > /dev/null 2>&1 &
+          echo "✅ ngrok 启动完成"
 
       - name: 获取 SSH 访问地址
         run: |
@@ -37,5 +48,5 @@ jobs:
           SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
           SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
           echo "🔹 使用以下命令连接到服务器："
-          echo "   ssh root@${SSH_HOST} -p ${SSH_PORT}"
+          echo "   ssh runner@$SSH_HOST -p $SSH_PORT"
           sleep 1h  # 保持 1 小时

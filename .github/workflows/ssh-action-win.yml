@@ -18,14 +18,14 @@ jobs:
 
       - name: 安装 ngrok 并暴露 SSH 端口
         run: |
-          Invoke-WebRequest -Uri "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip" -OutFile ngrok.zip
+          Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile ngrok.zip
           Expand-Archive -Path ngrok.zip -DestinationPath C:\ngrok
           C:\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
           Start-Process -FilePath C:\ngrok\ngrok.exe -ArgumentList "tcp 22" -NoNewWindow
 
       - name: 获取 SSH 访问地址
         run: |
-          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 5
           $ssh_address = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels | ConvertTo-Json -Depth 10
           $ssh_address = ($ssh_address.tunnels[0].public_url)
           echo "🔹 你的 SSH 地址：$ssh_address"

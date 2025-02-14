@@ -5,7 +5,7 @@ on:
 
 jobs:
   start-ssh-server:
-    runs-on: [self-hosted, ARM]  # 需要 ARM 机器
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: 安装 SSH 服务器
         run: |

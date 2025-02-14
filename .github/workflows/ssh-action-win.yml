@@ -22,7 +22,7 @@ jobs:
           Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile ngrok.zip
           Expand-Archive -Path ngrok.zip -DestinationPath C:\ngrok
           C:\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          C:\ngrok\ngrok.exe tcp 22
+          Start-Process -FilePath C:\ngrok\ngrok.exe -ArgumentList "tcp 22" -NoNewWindow -PassThru
 
       - name: 获取 SSH 访问地址
         run: |

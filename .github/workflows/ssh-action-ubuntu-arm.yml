@@ -7,6 +7,23 @@ jobs:
   start-ssh-server:
     runs-on: ubuntu-24.04-arm
     steps:
+      - name: 安装 davfs2
+        run: apt update && apt install -y davfs2
+
+      - name: 创建挂载目录
+        run: mkdir -p /mnt/share
+
+      - name: 配置凭据文件（root 访问）
+        run: |
+          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" > /etc/davfs2/secrets
+          chmod 600 /etc/davfs2/secrets
+
+      - name: 允许 root 访问 WebDAV
+        run: echo "use_locks 0" >> /etc/davfs2/davfs2.conf
+
+      - name: 以 root 挂载 Koofr
+        run: mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
+
       - name: 安装 SSH 服务器
         run: |
           sudo apt update && sudo apt install -y openssh-server

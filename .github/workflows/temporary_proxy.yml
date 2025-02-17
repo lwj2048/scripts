@@ -32,7 +32,10 @@ jobs:
 
       - name: 获取 ngrok 公网地址
         run: |
-          sleep 5
+          sleep 10
+          ps aux | grep ngrok
+          cat ngrok.log
+          curl -s http://localhost:4040/api/tunnels
           curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
           sleep 20m
 

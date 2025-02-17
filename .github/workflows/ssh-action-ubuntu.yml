@@ -15,11 +15,11 @@ jobs:
 
       - name: 配置凭据文件（root 访问）
         run: |
-          sudo echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" > /etc/davfs2/secrets
+          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
           sudo chmod 600 /etc/davfs2/secrets
 
       - name: 允许 root 访问 WebDAV
-        run: sudo echo "use_locks 0" >> /etc/davfs2/davfs2.conf
+        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
 
       - name: 以 root 挂载 Koofr
         run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share

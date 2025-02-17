@@ -1,0 +1,38 @@
+name: Deploy Proxy with Ngrok
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  deploy-proxy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 安装 tinyproxy（HTTP 代理）
+        run: |
+          sudo apt update
+          sudo apt install -y tinyproxy
+          sudo sed -i 's/^#Port 8888/Port 8080/' /etc/tinyproxy/tinyproxy.conf
+          sudo systemctl restart tinyproxy
+          echo "Tinyproxy 启动成功"
+
+      - name: 下载并安装 ngrok
+        run: |
+          curl -sSL https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -o ngrok.zip
+          unzip ngrok.zip
+          sudo mv ngrok /usr/local/bin/
+          ngrok authtoken $NGROK_AUTH_TOKEN
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: 启动 ngrok 并暴露 8080 端口
+        run: |
+          nohup ngrok http 8080 > ngrok.log 2>&1 &
+          sleep 5  # 确保 ngrok 启动完成
+
+      - name: 获取 ngrok 公网地址
+        run: |
+          sleep 5
+          curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+          sleep 20m
+

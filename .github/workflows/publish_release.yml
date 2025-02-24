@@ -23,7 +23,8 @@ jobs:
           version: ${{ env.POETRY_VERSION }}
       - name: Install deps
         shell: bash
-        run: 
+        run: |
+          set -ex
           git clone https://github.com/LazyAGI/LazyLLM.git
           cd LazyLLM 
           git checkout v0.4.0
@@ -55,6 +56,7 @@ jobs:
       - name: Check PyPI for existing version
         id: pypi_check
         run: |
+          set -ex
           VERSION=$(poetry version -s)
           PACKAGE_NAME=$(poetry version | awk '{print $1}')
           RESPONSE=$(curl -s https://pypi.org/pypi/$PACKAGE_NAME/json)

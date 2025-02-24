@@ -1,0 +1,77 @@
+name: Upload PyPI And Release
+
+on:
+  workflow_dispatch:  # 手动触发
+
+env:
+  POETRY_VERSION: "1.8.3"
+  PYTHON_VERSION: "3.10.9"
+
+jobs:
+  build-n-publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      - name: Install deps
+        shell: bash
+        run: 
+          git clone https://github.com/LazyAGI/LazyLLM.git
+          cd LazyLLM 
+          git checkout v0.4.0
+          git submodule update --init
+          cd ..
+          mv LazyLLM/* .
+          mv LazyLLM/.git .
+          rm -rf LazyLLM
+          pip install -e .
+      - name: Test import
+        working-directory: /tmp
+        shell: bash
+        run: python -c "import lazyllm"
+      - name: Copy files
+        shell: bash
+        run:  cp LazyLLM-Env/poetry.lock . && cp pyproject.toml lazyllm/
+      - name: Build doc
+        run: |
+          set -ex
+          export PYTHONPATH=$PWD:$PYTHONPATH
+          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
+          python docs/add_docstrings.py
+      - name: Clean cache
+        shell: bash
+        run: |
+          pip cache purge
+          pip freeze | grep -v "^-e" | xargs pip uninstall -y
+      - name: Check PyPI for existing version
+        id: pypi_check
+        run: |
+          VERSION=$(poetry version -s)
+          PACKAGE_NAME=$(poetry version | awk '{print $1}')
+          RESPONSE=$(curl -s https://pypi.org/pypi/$PACKAGE_NAME/json)
+          if echo "$RESPONSE" | jq -e ".releases | has(\"$VERSION\")"; then
+            echo "Version $VERSION already exists on PyPI. Skipping publish."
+            echo "pypi_version_exists=true" >> $GITHUB_ENV
+          else
+            echo "Version $VERSION does not exist on PyPI. Proceeding with publish."
+            echo "pypi_version_exists=false" >> $GITHUB_ENV
+          fi
+      # - name: Build and publish to pypi
+      #   if: env.pypi_version_exists == 'false'
+      #   uses: JRubics/poetry-publish@v2.1
+      #   with:
+      #     pypi_token: ${{ secrets.LazyLLM_INDEX_PYPI_TOKEN }}
+
+      # - name: Skip publish
+      #   if: env.pypi_version_exists == 'true'
+      #   shell: bash
+      #   run: echo "Skip publish"

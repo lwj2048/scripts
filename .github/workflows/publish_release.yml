@@ -40,7 +40,6 @@ jobs:
         id: pypi_check
         run: |
           set -ex
-          pip install 'poetry==1.8.3'
           VERSION=$(poetry version -s)
           PACKAGE_NAME=$(poetry version | awk '{print $1}')
           RESPONSE=$(curl -s https://pypi.org/pypi/$PACKAGE_NAME/json)
@@ -56,7 +55,6 @@ jobs:
         uses: JRubics/poetry-publish@v1.17
         with:
           pypi_token: ${{ secrets.LazyLLM_INDEX_PYPI_TOKEN }}
-          ignore_dev_requirements: true
 
       - name: Skip publish
         if: env.pypi_version_exists == 'true'

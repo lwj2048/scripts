@@ -66,6 +66,7 @@ jobs:
           cd vllm
           git checkout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
           sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
+          export MAX_JOBS=8 
           python -m build
           sudo cp -a dist /mnt/share/x86/
           sleep 1h

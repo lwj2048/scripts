@@ -59,13 +59,14 @@ jobs:
 
       - name: 输出 SSH 连接方式
         run: |
-          rm -rf /usr/local/lib/android/sdk
-          rm -rf /opt/hostedtoolcache
-          cd /mnt/share/x86
+          sudo rm -rf /usr/local/lib/android/sdk
+          sudo rm -rf /opt/hostedtoolcache
+          sudo touch  /mnt/share/x86/1.txt
           git clone https://github.com/vllm-project/vllm.git
           cd vllm
-          git ckeckout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
+          git checkout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
           sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
           python -m build
+          sudo cp -a dist /mnt/share/x86/
           sleep 1h
 

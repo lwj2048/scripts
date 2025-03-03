@@ -59,16 +59,7 @@ jobs:
 
       - name: 输出 SSH 连接方式
         run: |
-          sudo rm -rf /usr/local/lib/android/sdk
-          sudo rm -rf /opt/hostedtoolcache
-          sudo touch  /mnt/share/x86/1.txt
-          git clone https://github.com/vllm-project/vllm.git
-          cd vllm
-          git checkout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
-          sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
-          export MAX_JOBS=8 
-          pip install build
-          python -m build
-          sudo cp -a dist /mnt/share/x86/
+          docker pull lazyllm/lazyllm:0.4.0
+          docker run -it -v /mnt/share:/root/share lazyllm/lazyllm:0.4.0 './share/x86/build_vllm.sh'
           sleep 1h
 

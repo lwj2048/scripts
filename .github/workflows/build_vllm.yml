@@ -1,4 +1,4 @@
-name: build_vllm
+name: build vllm
 
 on:
   workflow_dispatch:  # 手动触发

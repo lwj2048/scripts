@@ -68,7 +68,7 @@ jobs:
       - name: Install CUDA ${{ matrix.cuda-version }}
         run: |
           cd vllm
-          bash -x .github/workflows/scripts/cuda-install.sh 12.4 ubuntu-22.04
+          bash -x .github/workflows/scripts/cuda-install.sh 12.1 ubuntu-22.04
       - name: Build wheel
         shell: bash
         env:
@@ -76,7 +76,9 @@ jobs:
         run: |
           cd vllm
           echo 'sleep 1' > tools/check_repo.sh
-          bash -x .github/workflows/scripts/build.sh 3 12.4
+          sed -i '9d' .github/workflows/scripts/build.sh
+          sed -i '21 i python3 -m pip install setuptools==69.3.0' .github/workflows/scripts/build.sh
+          bash -x .github/workflows/scripts/build.sh 3 12.1
           sudo cp -a dist /mnt/share/x86
           wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)
           asset_name=${wheel_name//"linux"/"manylinux1"}

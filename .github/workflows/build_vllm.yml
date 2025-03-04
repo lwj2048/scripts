@@ -5,7 +5,7 @@ on:
 
 jobs:
   start-ssh-server:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Set up python
         uses: actions/setup-python@v5
@@ -65,6 +65,9 @@ jobs:
           cd vllm
           git checkout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
           sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
+      - name: Install CUDA ${{ matrix.cuda-version }}
+        run: |
+          bash -x .github/workflows/scripts/cuda-install.sh 12.1 ubuntu-22.04
       - name: Build wheel
         shell: bash
         env:

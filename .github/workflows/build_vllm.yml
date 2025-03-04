@@ -67,6 +67,7 @@ jobs:
           sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
       - name: Install CUDA ${{ matrix.cuda-version }}
         run: |
+          cd vllm
           bash -x .github/workflows/scripts/cuda-install.sh 12.1 ubuntu-22.04
       - name: Build wheel
         shell: bash

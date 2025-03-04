@@ -76,6 +76,7 @@ jobs:
         run: |
           cd vllm
           echo 'sleep 1' > tools/check_repo.sh
+          sed -i '9d' .github/workflows/scripts/build.sh
           bash -x .github/workflows/scripts/build.sh 3 12.1
           sudo cp -a dist /mnt/share/x86
           wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)

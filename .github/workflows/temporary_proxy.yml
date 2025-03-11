@@ -12,23 +12,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install pCloud CLI
-        run: |
-          wget https://raw.githubusercontent.com/pcloudcom/console-client/master/build/bin/pcloudcc_amd64 -O pcloudcc
-          chmod +x pcloudcc
-          sudo mv pcloudcc /usr/local/bin/
-
-      - name: Login to pCloud
-        run: pcloudcc --username "mileroy21573@gmail.com" --password "456qazwsx" -s
-
-      - name: Mount pCloud
-        run: |
-          mkdir -p /mnt/share
-          pcloudcc --mount /mnt/share
-
-      - name: Verify Mount
-        run: ls -la ~/pcloud
-
       - name: 安装 SSH 服务器
         run: |
           sudo apt update && sudo apt install -y openssh-server

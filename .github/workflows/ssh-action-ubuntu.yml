@@ -50,6 +50,11 @@ jobs:
           sudo apt update && sudo apt install -y ngrok
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
           nohup ngrok tcp 22 > /dev/null 2>&1 &  # 暴露 SSH 端口
+          
+      - name: 扩大空间
+        run: |
+          sudo rm -rf /usr/local/lib/android/sdk
+          sudo rm -rf /opt/hostedtoolcache
 
       - name: 获取 SSH 访问地址
         run: |

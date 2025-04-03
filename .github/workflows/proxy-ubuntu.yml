@@ -39,7 +39,7 @@ jobs:
       #   run: sleep infinity
         - name: Install Gost
           run: |
-            wget -qO gost.tar.gz https://github.com/ginuerzh/gost/releases/latest/download/gost-linux-amd64.tar.gz
+            wget -qO gost.tar.gz https://github.com/ginuerzh/gost/releases/download/v2.12.0/gost_2.12.0_linux_amd64.tar.gz
             tar -xzf gost.tar.gz
             sudo mv gost /usr/local/bin/
             rm -rf gost.tar.gz

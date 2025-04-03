@@ -47,4 +47,6 @@ jobs:
         - name: Start Proxy
           run: |
             gost -L=:7890 &  # 启动 Socks5 代理
+            sleep 3  # 等待启动
+            echo "Proxy Address: $(curl -s https://ifconfig.me):7890"
             sleep 21600  # GitHub Actions 最长 6 小时

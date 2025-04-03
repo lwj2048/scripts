@@ -24,7 +24,7 @@ jobs:
 
       - name: Start Gost Proxy (Socks5 & HTTP)
         run: |
-          nohup gost -L=:7890 -F=forward+tls://socks5://:7891 > gost.log 2>&1 &
+          nohup gost -L=socks5://:7890 > gost.log 2>&1 &
 
       - name: Expose Proxy via Ngrok
         run: |

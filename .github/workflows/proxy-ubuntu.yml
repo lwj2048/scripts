@@ -1,0 +1,57 @@
+name: Proxy-Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup-proxy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install and configure Ngrok
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install -y ngrok
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Install Clash
+        run: |
+          wget -qO- https://github.com/Dreamacro/clash/releases/latest/download/clash-linux-amd64.tar.gz | tar -xz
+          sudo mv clash /usr/local/bin/clash
+          sudo chmod +x /usr/local/bin/clash
+          mkdir -p ~/.config/clash
+          wget -O ~/.config/clash/config.yaml https://raw.githubusercontent.com/Dreamacro/clash-dashboard-gh-pages/main/config.yaml
+
+      - name: Modify Clash Config (Listen on 0.0.0.0)
+        run: |
+          sed -i 's/^mixed-port: .*/mixed-port: 7890/' ~/.config/clash/config.yaml
+          sed -i 's/^allow-lan: .*/allow-lan: true/' ~/.config/clash/config.yaml
+          sed -i 's/^external-controller: .*/external-controller: 0.0.0.0:9090/' ~/.config/clash/config.yaml
+
+      - name: Start Clash
+        run: |
+          nohup clash -d ~/.config/clash > clash.log 2>&1 &
+
+      - name: Expose Clash Port via Ngrok
+        run: |
+          nohup ngrok tcp 7890 > ngrok.log 2>&1 &
+          sleep 5
+          NGROK_URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' | sed 's/tcp:\/\///')
+          echo "Ngrok Public Address: $NGROK_URL"
+          echo "Set up Clash Proxy using: socks5://$NGROK_URL"
+          echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
+
+      - name: Print Connection Info
+        run: |
+          echo "=============================="
+          echo "  📡 Clash Proxy is Ready!"
+          echo "  🌎 Ngrok Address: tcp://$NGROK_URL"
+          echo "  📲 Use on Mobile: socks5://$NGROK_URL"
+          echo "=============================="
+
+      - name: Keep Running
+        run: sleep infinity

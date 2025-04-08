@@ -2,7 +2,10 @@ name: Proxy-Ubuntu
 
 on:
   workflow_dispatch:
-
+  
+env:
+  CI_PATH: /home/mnt/platform_ci/GitHub/${{ github.repository }}/${{ github.run_number }}
+  
 jobs:
   setup-proxy:
     runs-on: ubuntu-latest
@@ -39,14 +42,13 @@ jobs:
       #   run: sleep infinity
         - name: Install Gost
           run: |
-            wget -qO gost.tar.gz https://github.com/ginuerzh/gost/releases/download/v2.12.0/gost_2.12.0_linux_amd64.tar.gz
-            tar -xzf gost.tar.gz
-            sudo mv gost /usr/local/bin/
-            rm -rf gost.tar.gz
+            env
+            printf '=%.0s' {1..30}; echo
+            echo ${CI_PATH}
+            echo ${LAZYLLM_PATH}
+            echo ${{ env.LAZYLLM_PATH }}
+            echo ${{ env.CI_PATH }}
+          env:
+            LAZYLLM_PATH: /home/mnt/platform_ci/GitHub/${{ github.repository }}/${{ github.run_number }}/${{ github.run_id }}-${{ github.job }}
   
-        - name: Start Proxy
-          run: |
-            gost -L=:7890 &  # 启动 Socks5 代理
-            sleep 3  # 等待启动
-            echo "Proxy Address: $(curl -s https://ifconfig.me):7890"
-            sleep 21600  # GitHub Actions 最长 6 小时
+

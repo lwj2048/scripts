@@ -48,6 +48,8 @@ jobs:
             echo ${LAZYLLM_PATH}
             echo ${{ env.LAZYLLM_PATH }}
             echo ${{ env.CI_PATH }}
+            echo "${{ toJson(github) }}"
+            echo "${{ toJson(env) }}"
           env:
             LAZYLLM_PATH: /home/mnt/platform_ci/GitHub/${{ github.repository }}/${{ github.run_number }}/${{ github.run_id }}-${{ github.job }}
   

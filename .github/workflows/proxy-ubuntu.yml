@@ -1,4 +1,4 @@
-name: Proxy-Ubuntu
+name: test
 
 on:
   workflow_dispatch:
@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up python 3.12
+      - name: Set up python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: 3.13
       - name: Install lazyllm
         shell: bash
         run: |

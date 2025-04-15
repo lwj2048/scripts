@@ -3,54 +3,20 @@ name: Proxy-Ubuntu
 on:
   workflow_dispatch:
   
-env:
-  CI_PATH: /home/mnt/platform_ci/GitHub/${{ github.repository }}/${{ github.run_number }}
-  
 jobs:
   setup-proxy:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Install Ngrok
-      #   run: |
-      #     curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-      #     echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-      #     sudo apt update && sudo apt install -y ngrok
-      #     ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-
-      # - name: Install Gost (Lightweight Proxy)
-      #   run: |
-      #     wget -O gost.tar.gz https://github.com/ginuerzh/gost/releases/download/v2.12.0/gost_2.12.0_linux_amd64.tar.gz
-      #     tar -xzvf gost.tar.gz
-      #     sudo mv gost /usr/local/bin/gost
-      #     sudo chmod +x /usr/local/bin/gost
-
-      # - name: Start Gost Proxy (Socks5 & HTTP)
-      #   run: |
-      #     nohup gost -L=socks5://:7890 > gost.log 2>&1 &
-
-      # - name: Expose Proxy via Ngrok
-      #   run: |
-      #     nohup ngrok tcp 7890 > ngrok.log 2>&1 &
-      #     sleep 5
-      #     NGROK_URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' | sed 's/tcp:\/\///')
-      #     echo "Ngrok Public Address: $NGROK_URL"
-      #     echo "Socks5 Proxy: socks5://$NGROK_URL"
-      #     echo "HTTP Proxy: http://$NGROK_URL"
-
-      # - name: Keep Running
-      #   run: sleep infinity
-        - name: Install Gost
-          run: |
-            env
-            printf '=%.0s' {1..30}; echo
-            echo ${CI_PATH}
-            echo ${LAZYLLM_PATH}
-            echo ${{ env.LAZYLLM_PATH }}
-            echo ${{ env.CI_PATH }}
-            echo "${{ toJson(github) }}"
-            echo "${{ toJson(env) }}"
-          env:
-            LAZYLLM_PATH: /home/mnt/platform_ci/GitHub/${{ github.repository }}/${{ github.run_number }}/${{ github.run_id }}-${{ github.job }}
-  
-
+      - name: Set up python 3.10.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10.9
+      - name: Install lazyllm
+        shell: bash
+        run: |
+          which python
+          which pip
+          python -V
+          pip install lazyllm
+      

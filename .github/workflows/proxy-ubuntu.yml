@@ -18,12 +18,12 @@ jobs:
       - name: clone and build
         shell: bash
         run: |
-          cd /temp
           git clone https://github.com/LazyAGI/LazyLLM.git
           cd LazyLLM
           git submodule update --init
           cp LazyLLM-Env/poetry.lock . && cp pyproject.toml lazyllm/
           poetry build
+          pwd
         
       - name: 安装 davfs2
         run: sudo apt update && sudo apt install -y davfs2

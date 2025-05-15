@@ -28,21 +28,17 @@ jobs:
           PG_USER: postgres.zjjllyrxjjsqhemezuwn
           PG_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
         run: |
-          python <<EOF
-import psycopg2
-import random
-
-conn = psycopg2.connect(
-    host='${{ env.PG_HOST }}',
-    port=int('${{ env.PG_PORT }}'),
-    dbname='${{ env.PG_DBNAME }}',
-    user='${{ env.PG_USER }}',
-    password='${{ env.PG_PASSWORD }}'
-)
-cur = conn.cursor()
-cur.execute('INSERT INTO public."Guarantee" (id) VALUES (%s);', (random.randint(10000, 99999),))
-conn.commit()
-cur.close()
-conn.close()
-print("✅ Successfully inserted.")
-EOF
+          python -c "import psycopg2, random, os; \
+          conn = psycopg2.connect( \
+              host=os.getenv('PG_HOST'), \
+              port=os.getenv('PG_PORT'), \
+              dbname=os.getenv('PG_DBNAME'), \
+              user=os.getenv('PG_USER'), \
+              password=os.getenv('PG_PASSWORD') \
+          ); \
+          cur = conn.cursor(); \
+          cur.execute('INSERT INTO public.\"Guarantee\" (id) VALUES (%s);', (random.randint(10000, 99999),)); \
+          conn.commit(); \
+          cur.close(); \
+          conn.close(); \
+          print('✅ Successfully inserted a random ID.')"

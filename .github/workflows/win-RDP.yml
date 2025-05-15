@@ -12,11 +12,9 @@ jobs:
         run: |
           $username = "rdpuser"
           $password = "P@ssw0rd123"
-          # 创建用户
           net user $username $password /add
-          # 加入远程桌面用户组
           net localgroup "Remote Desktop Users" $username /add
-          Write-Output "创建用户 $username，密码 $password，已加入远程桌面用户组"
+          Write-Output "User $username with password $password added to Remote Desktop Users group"
       - name: 开启远程桌面服务
         run: |
           # 允许远程桌面连接

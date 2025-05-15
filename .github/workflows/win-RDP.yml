@@ -47,4 +47,32 @@ jobs:
           $rdp_port = $rdp_address -replace "tcp://([^:]+):([0-9]+)", '$2'
           Write-Output "🔹 使用以下命令连接到服务器："
           Write-Output "   mstsc /v:${rdp_host}:${rdp_port}"
+
+          Write-Host "✅ 检查用户是否存在..."
+          net user rdpuser
+
+          Write-Host "`n✅ 检查用户是否在 Remote Desktop Users 组..."
+          net localgroup "Remote Desktop Users"
+
+          Write-Host "`n✅ 检查远程桌面是否启用 (fDenyTSConnections)..."
+          Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections"
+
+          Write-Host "`n✅ 检查防火墙规则是否启用（远程桌面）..."
+          Get-NetFirewallRule -DisplayGroup "Remote Desktop" | Select Name, Enabled, Action
+
+          Write-Host "`n✅ 检查远程桌面服务（TermService）状态..."
+          Get-Service -Name TermService | Select Status, StartType
+
+          Write-Host "`n✅ 检查监听的端口..."
+          netstat -an | findstr ":3389"
+
+          Write-Host "`n✅ 检查 ngrok 是否成功建立隧道..."
+          try {
+            $response = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels
+            $response.tunnels | ForEach-Object {
+              Write-Host "🔹 Tunnel: $($_.public_url) -> $($_.config.addr)"
+            }
+          } catch {
+            Write-Host "❌ 无法连接到 ngrok 本地接口"
+          }
           Start-Sleep -Seconds 21600  # 保持 6 小时

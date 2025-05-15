@@ -1,3 +1,5 @@
+name: check and rollback
+
 on:
   workflow_run:
     workflows: ["Check Keywords"]
@@ -23,3 +25,4 @@ jobs:
       if: steps.job_status.outputs.job_status == 'failure'
       run: |
         echo "Check Keywords error"  # 当main.yaml Check Keywords 结束后，并且结果为failure时触发
+        # TUDO

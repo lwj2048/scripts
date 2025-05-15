@@ -1,4 +1,4 @@
-name: win-RDP
+name: win RDP
 
 on:
   workflow_dispatch:
@@ -38,5 +38,5 @@ jobs:
           $rdp_host = $rdp_address -replace "tcp://([^:]+):([0-9]+)", '$1'
           $rdp_port = $rdp_address -replace "tcp://([^:]+):([0-9]+)", '$2'
           Write-Output "🔹 使用以下命令连接到服务器："
-          Write-Output "   mstsc /v:$rdp_host:$rdp_port"
+          Write-Output "   mstsc /v:${rdp_host}:${rdp_port}"
           Start-Sleep -Seconds 21600  # 保持 6 小时

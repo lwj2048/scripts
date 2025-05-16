@@ -1,0 +1,29 @@
+name: firefox chrome
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  start-ssh-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: 部署火狐
+        run: |
+          sudo docker run -d --name chrome-gui  -p 5800:5800 -v $HOME/Downloads:/config:rw  jlesage/chrome
+      - name: 安装 ngrok 并暴露 SSH 端口
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install -y ngrok
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          nohup ngrok tcp 5800 > /dev/null 2>&1 &  # 暴露 SSH 端口
+      - name: 访问地址
+        run: |
+          sleep 5
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+          echo "🔹 你的 SSH 地址：" $(cat ssh_address.txt)
+          sleep 6h

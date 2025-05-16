@@ -11,9 +11,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+      - name: 安装 davfs2
+        run: sudo apt update && sudo apt install -y davfs2
+
+      - name: 创建挂载目录
+        run: sudo mkdir -p /mnt/share
+
+      - name: 配置凭据文件（root 访问）
+        run: |
+          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
+          sudo chmod 600 /etc/davfs2/secrets
+      - name: 允许 root 访问 WebDAV
+        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
+
+      - name: 以 root 挂载 Koofr
+        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
+        
       - name: 部署火狐
         run: |
-          sudo docker run -d --name firefox -p 5800:5800 -v /docker/appdata/firefox:/config:rw  jlesage/firefox
+          sudo docker run -d --name firefox  -e ENABLE_CJK_FONT=1 -p 5800:5800 -v /mnt/share/x86/firefox:/config:rw  jlesage/firefox
       - name: 安装 ngrok 并暴露 SSH 端口
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null

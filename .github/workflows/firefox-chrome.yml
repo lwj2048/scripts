@@ -29,7 +29,7 @@ jobs:
         
       - name: 部署火狐
         run: |
-          sudo docker run -d --name firefox  -e ENABLE_CJK_FONT=1 -p 5800:5800 -v /mnt/share/x86/firefox:/config:rw  jlesage/firefox
+          sudo docker run -d --name firefox -e VNC_PASSWORD=${{ secrets.FIREFOX_PASSWORD }} -e ENABLE_CJK_FONT=1 -p 5800:5800 -v /mnt/share/x86/firefox:/config:rw  jlesage/firefox
       - name: 安装 ngrok 并暴露 SSH 端口
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null

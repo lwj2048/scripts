@@ -57,6 +57,8 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache
       - name : 安装k8s
         run: |
+          sudo apt update
+          sudo apt install socat conntrack -y
           curl -sfL https://get-kk.kubesphere.io | sudo sh -
           yes |sudo ./kk create cluster --with-kubesphere v3.2.1
 

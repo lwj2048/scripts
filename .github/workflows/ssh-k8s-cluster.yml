@@ -58,7 +58,7 @@ jobs:
       - name : 安装k8s
         run: |
           curl -sfL https://get-kk.kubesphere.io | sudo sh -
-          sudo ./kk create cluster --with-kubesphere v3.2.1
+          yes |sudo ./kk create cluster --with-kubesphere v3.2.1
 
       - name: 获取 SSH 访问地址
         run: |

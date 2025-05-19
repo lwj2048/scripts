@@ -1,17 +1,17 @@
-name: build vllm
+name: SSH k8s cluster
 
 on:
   workflow_dispatch:  # 手动触发
 
 jobs:
   start-ssh-server:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Set up python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-            
+
       - name: 安装 davfs2
         run: sudo apt update && sudo apt install -y davfs2
 
@@ -51,6 +51,15 @@ jobs:
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
           nohup ngrok tcp 22 > /dev/null 2>&1 &  # 暴露 SSH 端口
 
+      - name: 扩大空间
+        run: |
+          sudo rm -rf /usr/local/lib/android/sdk
+          sudo rm -rf /opt/hostedtoolcache
+      - name : 安装k8s
+        run: |
+          curl -sfL https://get-kk.kubesphere.io | sudo sh -
+          sudo ./kk create cluster --with-kubesphere v3.2.1
+
       - name: 获取 SSH 访问地址
         run: |
           sleep 5
@@ -59,31 +68,6 @@ jobs:
 
       - name: 输出 SSH 连接方式
         run: |
-          pip install vllm==0.7.3
-          sudo rm -rf /usr/local/lib/android/sdk
-          sudo rm -rf /opt/hostedtoolcache
-          git clone https://github.com/vllm-project/vllm.git
-          cd vllm
-          git checkout c6ed93860fa8338bf7e4dfcce0040046a2f0df48
-          sed -i 's/name = "vllm"/name = "lazyllm-vllm"/' pyproject.toml
-      # - name: Install CUDA ${{ matrix.cuda-version }}
-      #   run: |
-      #     cd vllm
-      #     bash -x .github/workflows/scripts/cuda-install.sh 12.1 ubuntu-22.04
-      # - name: Build wheel
-      #   shell: bash
-      #   env:
-      #     CMAKE_BUILD_TYPE: Release # do not compile with debug symbol to reduce wheel size
-      #   run: |
-      #     cd vllm
-      #     echo 'sleep 1' > tools/check_repo.sh
-      #     sed -i '9d' .github/workflows/scripts/build.sh
-      #     sed -i '21 i python3 -m pip install setuptools==69.3.0' .github/workflows/scripts/build.sh
-      #     bash -x .github/workflows/scripts/build.sh 3 12.1
-      #     sudo cp -a dist /mnt/share/x86
-      #     wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)
-      #     asset_name=${wheel_name//"linux"/"manylinux1"}
-      #     echo "wheel_name=${wheel_name}" >> "$GITHUB_ENV"
-      #     echo "asset_name=${asset_name}" >> "$GITHUB_ENV"
-      #     sleep 1h
-
+          echo "🔹 使用以下命令连接到服务器："
+          echo " ssh root@$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#') -p $(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#') "
+          sleep 6h

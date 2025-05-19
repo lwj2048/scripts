@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  # 手动触发
 
 jobs:
-  start-ssh-server:
+  start-web-server:
     runs-on: ubuntu-latest
     steps:
       - name: Set up python
@@ -30,7 +30,7 @@ jobs:
       - name: 部署火狐
         run: |
           sudo docker run -d --name firefox -e VNC_PASSWORD=${{ secrets.FIREFOX_PASSWORD }} -e ENABLE_CJK_FONT=1 -p 5800:5800 jlesage/firefox
-      - name: 安装 ngrok 并暴露 SSH 端口
+      - name: 安装 ngrok 并暴露端口
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
           echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
@@ -40,6 +40,6 @@ jobs:
       - name: 访问地址
         run: |
           sleep 5
-          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
-          echo "🔹 你的 SSH 地址：" $(cat ssh_address.txt)
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > address.txt
+          echo "🔹 你的 SSH 地址：" $(cat address.txt)
           sleep 6h

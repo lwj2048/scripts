@@ -65,6 +65,21 @@ jobs:
           sudo apt install socat conntrack -y
           curl -sfL https://get-kk.kubesphere.io | sudo sh -
           yes |sudo ./kk create cluster --with-kubesphere v3.2.1
+
+      - name : 监控localhost端口
+        run: |
+          sudo nohup kubectl port-forward svc/ks-console -n kubesphere-system 30880:80 > portforward.log 2>&1 &
+          
+      - name : install cloudflared
+        run: |
+          # Add cloudflare gpg key
+          sudo mkdir -p --mode=0755 /usr/share/keyrings
+          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+          # Add this repo to your apt repositories
+          echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+          # install cloudflared
+          sudo apt-get update && sudo apt-get install cloudflared
+          sudo nohup cloudflared tunnel run --token ${{ secrets.Cloudflare_tunnel_kubesphere_token }} > cloudflared.log 2>&1 &
           
       - name: 获取 SSH 访问地址
         run: |

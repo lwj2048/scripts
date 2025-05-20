@@ -55,6 +55,10 @@ jobs:
         run: |
           sudo rm -rf /usr/local/lib/android/sdk
           sudo rm -rf /opt/hostedtoolcache
+          
+      - name : login docker hub   
+        run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        
       - name : 安装k8s
         run: |
           sudo apt update

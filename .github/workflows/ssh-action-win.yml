@@ -7,6 +7,14 @@ jobs:
   start-ssh-server:
     runs-on: windows-latest
     steps:
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10.9
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
       - name: 安装 SSH 服务器
         run: |
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
@@ -43,5 +51,5 @@ jobs:
           $ssh_port = $ssh_address -replace "tcp://([^:]+):([0-9]+)", '$2'
           echo "🔹 使用以下命令连接到服务器："
           echo "   ssh runneradmin@$ssh_host -p $ssh_port"
-          Start-Sleep -Seconds 3600  # 保持 1 小时
+          Start-Sleep -Seconds 30000
 

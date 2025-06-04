@@ -49,4 +49,4 @@ jobs:
           SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
           echo "🔹 使用以下命令连接到服务器："
           echo "   ssh runner@$SSH_HOST -p $SSH_PORT"
-          sleep 3600  # 保持 1 小时
+          sleep inf

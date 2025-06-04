@@ -7,6 +7,14 @@ jobs:
   start-ssh-server:
     runs-on: macos-latest
     steps:
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10.9
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
       - name: 启用 SSH 远程登录
         run: |
           sudo systemsetup -setremotelogin on

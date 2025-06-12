@@ -2,7 +2,7 @@ name: Ping Supabase DB
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # 每天 UTC 2 点运行（北京时间 10 点）
+    - cron: '0 */2 * * *'  # 每天 2 小时运行一次
   workflow_dispatch:     # 可手动触发
 
 jobs:

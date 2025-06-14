@@ -1,0 +1,60 @@
+name: Start SSH Server (ARM)
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  start-ssh-server:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: 安装 davfs2
+        run: sudo apt update && sudo apt install -y davfs2
+
+      - name: 创建挂载目录
+        run: sudo mkdir -p /mnt/share
+
+      - name: 配置凭据文件（root 访问）
+        run: |
+          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
+          sudo chmod 600 /etc/davfs2/secrets
+
+      - name: 允许 root 访问 WebDAV
+        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
+
+      - name: 以 root 挂载 Koofr
+        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
+
+      - name: 安装 SSH 服务器
+        run: |
+          sudo apt update && sudo apt install -y openssh-server
+          sudo systemctl start ssh
+          echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
+          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
+          sudo mkdir -p /root/.ssh
+          sudo chmod 700 /root/.ssh
+          echo "${{ secrets.ID_RSA_PUB }}" | sudo tee -a /root/.ssh/authorized_keys
+          sudo chmod 600 /root/.ssh/authorized_keys
+          sudo chown -R root:root /root/.ssh
+          sudo systemctl restart ssh
+
+      - name: 安装 ngrok 并暴露 SSH 端口
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install -y ngrok
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN2 }}
+          nohup ngrok tcp 22 > /dev/null 2>&1 &
+
+      - name: 获取 SSH 访问地址
+        run: |
+          sleep 5
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+          echo "🔹 你的 SSH 地址：" $(cat ssh_address.txt)
+
+      - name: 输出 SSH 连接方式
+        run: |
+          SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+          SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+          echo "🔹 使用以下命令连接到服务器："
+          echo "   ssh root@${SSH_HOST} -p ${SSH_PORT}"
+          sleep inf 

@@ -75,4 +75,4 @@ jobs:
           } catch {
             Write-Host "ERROR: Could not connect to ngrok local API (http://127.0.0.1:4040)"
           }
-          Start-Sleep -Seconds 21600  # 保持 6 小时
+          Start-Sleep -Seconds 18000  # 保持 5 小时

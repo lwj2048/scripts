@@ -36,10 +36,10 @@ jobs:
           echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
           sudo apt update && sudo apt install -y ngrok
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN2 }}
-          nohup ngrok tcp 5800 > /dev/null 2>&1 &  # 暴露 SSH 端口
+          nohup ngrok http 5800 > /dev/null 2>&1 &  
       - name: 访问地址
         run: |
           sleep 5
           curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > address.txt
-          echo "🔹 你的 SSH 地址：" $(cat address.txt)
+          echo "🔹 你的地址：" $(cat address.txt)
           sleep 5h

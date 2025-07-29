@@ -15,11 +15,11 @@ jobs:
       - name:  挂载
         run: |
           sudo apt update && sudo apt install -y fuse3
-          sudo mkdir -p /mnt/goog-drive
+          sudo mkdir -p /mnt/google-drive
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 -d > ~/.config/rclone/rclone.conf
-          sudo rclone mount google-drive: /mnt/goog-drive --allow-other --vfs-cache-mode writes --daemon
+          sudo rclone mount google-drive: /mnt/google-drive --allow-other --vfs-cache-mode writes --daemon
       - name: 安装 SSH 服务器
         run: |
           sudo apt update && sudo apt install -y openssh-server

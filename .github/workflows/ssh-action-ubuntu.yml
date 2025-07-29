@@ -14,7 +14,7 @@ jobs:
 
       - name:  挂载
         run: |
-          sudo apt update && sudo apt install -y fuse fuse3
+          sudo apt update && sudo apt install -y fuse3
           sudo mkdir -p /mnt/goog-drive
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone

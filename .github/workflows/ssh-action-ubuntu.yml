@@ -11,24 +11,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-            
-      - name: 安装 davfs2
-        run: sudo apt update && sudo apt install -y davfs2
 
-      - name: 创建挂载目录
-        run: sudo mkdir -p /mnt/share
-
-      - name: 配置凭据文件（root 访问）
+      - name:  挂载
         run: |
-          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
-          sudo chmod 600 /etc/davfs2/secrets
-
-      - name: 允许 root 访问 WebDAV
-        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
-
-      - name: 以 root 挂载 Koofr
-        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
-
+          sudo apt update && sudo apt install -y fuse fuse3
+          sudo mkdir -p /mnt/goog-drive
+          curl https://rclone.org/install.sh | sudo bash
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 -d > ~/.config/rclone/rclone.conf
+          sudo rclone mount google-drive: /mnt/goog-drive --allow-other --vfs-cache-mode writes --daemon
       - name: 安装 SSH 服务器
         run: |
           sudo apt update && sudo apt install -y openssh-server
@@ -53,8 +44,8 @@ jobs:
           
       - name: 扩大空间
         run: |
-          sudo rm -rf /usr/local/lib/android/sdk
-          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/local/lib/android/sdk &
+          sudo rm -rf /opt/hostedtoolcache &
 
       - name: 获取 SSH 访问地址
         run: |

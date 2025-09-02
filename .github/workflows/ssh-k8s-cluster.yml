@@ -53,8 +53,8 @@ jobs:
 
       - name: 扩大空间
         run: |
-          sudo rm -rf /usr/local/lib/android/sdk
-          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/local/lib/android/sdk &
+          sudo rm -rf /opt/hostedtoolcache &
           
       - name : login docker hub   
         run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -72,8 +72,8 @@ jobs:
           sudo mkdir -p /mnt/prometheus
           sudo chmod 777 /mnt/prometheus
           sudo kubectl apply -f storage-class.yaml
-          sudo kubectl apply -f kubesphere-installer.yaml 
-          sudo kubectl apply -f cluster-configuration.yaml
+          sudo KKZONE=cn kubectl apply -f kubesphere-installer.yaml 
+          sudo KKZONE=cn kubectl apply -f cluster-configuration.yaml
 
       - name : 监控localhost端口
         run: |

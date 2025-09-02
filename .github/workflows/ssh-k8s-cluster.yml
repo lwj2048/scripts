@@ -63,8 +63,17 @@ jobs:
         run: |
           sudo apt update
           sudo apt install socat conntrack -y
-          curl -sfL https://get-kk.kubesphere.io | sudo sh -
-          yes |sudo ./kk create cluster --with-kubesphere v3.2.1
+          # yes |sudo ./kk create cluster --with-kubesphere v3.2.1
+          export KKZONE=cn
+          curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.7 sudo sh -
+          echo yes|sudo ./kk create cluster --with-kubernetes v1.21.5
+          git clone https://github.com/lwj-st/kubesphere-install.git
+          cd kubesphere-install
+          sudo mkdir -p /mnt/prometheus
+          sudo chmod 777 /mnt/prometheus
+          sudo kubectl apply -f storage-class.yaml
+          sudo kubectl apply -f kubesphere-installer.yaml 
+          sudo kubectl apply -f cluster-configuration.yaml
 
       - name : 监控localhost端口
         run: |

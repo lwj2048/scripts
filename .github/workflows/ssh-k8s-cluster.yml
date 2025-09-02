@@ -61,7 +61,7 @@ jobs:
 
       - name : 安装k8s
         run: |
-          sudo ./shell/install/install_k8s.sh
+          sudo bash ./shell/install/install_k8s.sh
 
       - name : 监控localhost端口
         run: |

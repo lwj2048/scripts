@@ -1,0 +1,68 @@
+name: PDF to Markdown
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdf_file:
+        description: 'PDF 文件名'
+        required: true
+        default: 'example.pdf'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: 安装 davfs2
+        run: sudo apt update && sudo apt install -y davfs2
+
+      - name: 创建挂载目录
+        run: sudo mkdir -p /mnt/share
+
+      - name: 配置凭据文件（root 访问）
+        run: |
+          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
+          sudo chmod 600 /etc/davfs2/secrets
+
+      - name: 允许 root 访问 WebDAV
+        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
+
+      - name: 以 root 挂载 Koofr
+        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
+                
+      - name: 扩大空间
+        run: |
+          sudo rm -rf /usr/local/lib/android/sdk &
+          sudo rm -rf /opt/hostedtoolcache &
+          sudo rm -rf rm -rf /usr/local/.ghcup &  
+        
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mineru marker-pdf
+
+      - name: Convert PDF with MinerU
+        run: |
+          mkdir -p output/mineru
+          mineru convert "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" --output output/mineru/
+
+      - name: Convert PDF with marker-pdf
+        run: |
+          mkdir -p output/marker
+          marker-pdf "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" output/marker/
+
+      - name: Upload Markdown artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: converted-md
+          path: |
+            output/mineru/*.md
+            output/marker/*.md

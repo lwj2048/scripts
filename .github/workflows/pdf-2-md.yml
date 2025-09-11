@@ -56,8 +56,6 @@ jobs:
         run: |
           source ~/mineru_env/bin/activate
           mkdir -p output/mineru
-          sudo ls /mnt/share
-          sudo ls /mnt/share/pdf
           sudo cp /mnt/share/pdf/${{ github.event.inputs.pdf_file }} .
           mineru -p ${{ github.event.inputs.pdf_file }}  --output output/mineru/
 
@@ -73,5 +71,5 @@ jobs:
         with:
           name: converted-md
           path: |
-            output/mineru/*.md
-      #     output/marker/*.md
+            output/mineru
+      #     output/marker

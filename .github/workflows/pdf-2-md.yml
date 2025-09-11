@@ -48,17 +48,22 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install uv
+          uv venv ~/mineru_env
+          source ~/mineru_env/bin/activate
           uv pip install -U "mineru[core]"
 
       - name: Convert PDF with MinerU
         run: |
+          source ~/mineru_env/bin/activate
           mkdir -p output/mineru
           mineru -p "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" --output output/mineru/
 
+      # 耗时久，资源开销大
       # - name: Convert PDF with marker-pdf
       #   run: |
+      #     pip install marker
       #     mkdir -p output/marker
-      #     marker-pdf "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" output/marker/
+      #     marker_single  "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}"  --output_format markdown --output_dir output/marker/
 
       - name: Upload Markdown artifacts
         uses: actions/upload-artifact@v4

@@ -52,7 +52,7 @@ jobs:
       - name: Convert PDF with MinerU
         run: |
           mkdir -p output/mineru
-          mineru convert "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" --output output/mineru/
+          mineru -p "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" --output output/mineru/
 
       # - name: Convert PDF with marker-pdf
       #   run: |

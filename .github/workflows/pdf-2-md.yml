@@ -56,7 +56,10 @@ jobs:
         run: |
           source ~/mineru_env/bin/activate
           mkdir -p output/mineru
-          mineru -p "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" --output output/mineru/
+          sudo ls /mnt/share
+          sudo ls /mnt/share/pdf
+          sudo cp /mnt/share/pdf/${{ github.event.inputs.pdf_file }} .
+          mineru -p ${{ github.event.inputs.pdf_file }}  --output output/mineru/
 
       # 耗时久，资源开销大
       # - name: Convert PDF with marker-pdf

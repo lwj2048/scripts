@@ -60,7 +60,7 @@ jobs:
           marker-pdf "/mnt/share/pdf/${{ github.event.inputs.pdf_file }}" output/marker/
 
       - name: Upload Markdown artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: converted-md
           path: |

@@ -39,8 +39,10 @@ runs:
       shell: powershell
       run: |
         choco install cloudflared
+        cloudflared.exe service install ${{ inputs.tunnel_token }}
 
     - name: 启动 Cloudflared 隧道
+      if: ${{ inputs.platform != 'windows' }}
       shell: bash
       run: |
         sudo nohup cloudflared tunnel run --token ${{ inputs.tunnel_token }} > ${{ inputs.log_file }} 2>&1 &

@@ -41,7 +41,7 @@ runs:
         echo "✅ 已允许 Root 登录"
         sudo mkdir -p /var/root/.ssh
         sudo chmod 700 /var/root/.ssh
-        sudo echo "{{ inputs.public_key }}" >> /var/root/.ssh/authorized_keys
+        echo "{{ inputs.public_key }}" | sudo tee -a /var/root/.ssh/authorized_keys > /dev/null
         sudo chmod 600 /var/root/.ssh/authorized_keys
         echo "✅ SSH 公钥已添加"
 

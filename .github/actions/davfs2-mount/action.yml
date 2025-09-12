@@ -45,12 +45,8 @@ runs:
       if: ${{ inputs.platform == 'windows' }}
       shell: powershell
       run: |
-        # Windows 使用 WebDAV 客户端
-        Write-Host "Windows 系统将使用内置 WebDAV 客户端"
-        # Windows 使用 net use 命令挂载 WebDAV
-        $webdavPath = ${{ inputs.webdav_url }}.Replace("https://", "\\").Replace("/", "\")
-        net use Z: $webdavPath /user:${{ inputs.username }} ${{ inputs.password }}
-        Write-Host "WebDAV 已挂载到 Z: 盘" 
+        Write-Output "暂不支持"
+
         
 
         

@@ -1,4 +1,4 @@
-name: Check Keywords
+name: Check Keywords and to Gitee
 
 on:
   push:
@@ -10,8 +10,7 @@ jobs:
   check_keywords:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2

@@ -9,7 +9,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: 清理空间 (Ubuntu/Debian)
+    - name: 清理空间 (Ubuntu)
       if: ${{ inputs.platform == 'ubuntu' }}
       shell: bash
       run: |

@@ -14,35 +14,26 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
-      - name: 安装 davfs2
-        run: sudo apt update && sudo apt install -y davfs2
-
-      - name: 创建挂载目录
-        run: sudo mkdir -p /mnt/share
-
-      - name: 配置凭据文件（root 访问）
-        run: |
-          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
-          sudo chmod 600 /etc/davfs2/secrets
-
-      - name: 允许 root 访问 WebDAV
-        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
-
-      - name: 以 root 挂载 Koofr
-        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
-                
       - name: 扩大空间
-        run: |
-          sudo rm -rf /usr/local/lib/android/sdk &
-          sudo rm -rf /opt/hostedtoolcache &
-          sudo rm -rf rm -rf /usr/local/.ghcup &  
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'ubuntu'
+
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
         
       - name: Install dependencies
         run: |

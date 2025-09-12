@@ -1,7 +1,7 @@
 name: SSH k8s cluster
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:  
 
 jobs:
   start-k8s-cluster:
@@ -12,51 +12,35 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      - name: 安装 davfs2
-        run: sudo apt update && sudo apt install -y davfs2
-
-      - name: 创建挂载目录
-        run: sudo mkdir -p /mnt/share
-
-      - name: 配置凭据文件（root 访问）
-        run: |
-          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
-          sudo chmod 600 /etc/davfs2/secrets
-
-      - name: 允许 root 访问 WebDAV
-        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
-
-      - name: 以 root 挂载 Koofr
-        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
-
-      - name: 安装 SSH 服务器
-        run: |
-          sudo apt update && sudo apt install -y openssh-server
-          sudo systemctl start ssh
-          echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
-          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
-          # 确保 SSH 目录和权限正确
-          sudo mkdir -p /root/.ssh
-          sudo chmod 700 /root/.ssh
-          # 追加公钥到 authorized_keys
-          echo "${{ secrets.ID_RSA_PUB }}" | sudo tee -a /root/.ssh/authorized_keys
-          # 设置正确权限
-          sudo chmod 600 /root/.ssh/authorized_keys
-          sudo chown -R root:root /root/.ssh
-      - name: 安装 ngrok 并暴露 SSH 端口
-        run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-          sudo apt update && sudo apt install -y ngrok
-          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          nohup ngrok tcp 22 > /dev/null 2>&1 &  # 暴露 SSH 端口
+          python-version: '3.10.9'
 
       - name: 扩大空间
-        run: |
-          sudo rm -rf /usr/local/lib/android/sdk &
-          sudo rm -rf /opt/hostedtoolcache &
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'ubuntu'
+
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'ubuntu'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
+
+      - name: 安装 ngrok 并暴露端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
           
       - name : login docker hub   
         run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -71,16 +55,12 @@ jobs:
         run: |
           sudo nohup kubectl port-forward svc/ks-console -n kubesphere-system 30880:80 > portforward.log 2>&1 &
           
-      - name : install cloudflared
-        run: |
-          # Add cloudflare gpg key
-          sudo mkdir -p --mode=0755 /usr/share/keyrings
-          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
-          # Add this repo to your apt repositories
-          echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
-          # install cloudflared
-          sudo apt-get update && sudo apt-get install cloudflared
-          sudo nohup cloudflared tunnel run --token ${{ secrets.Cloudflare_tunnel_kubesphere_token }} > cloudflared.log 2>&1 &
+      - name: 安装 Cloudflared 隧道
+        uses: ./.github/actions/cloudflared-tunnel
+        with:
+          platform: 'ubuntu'
+          tunnel_token: ${{ secrets.CLOUDFLARE_TUNNEL_KUBESPHERE_TOKEN }}
+          log_file: 'cloudflared.log'
           
       - name: 获取 SSH 访问地址
         run: |

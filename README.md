@@ -1,62 +1,14 @@
-目录结构
-- xiaobing-script
-    - README.md
-    - python
-        - Ascend
-            - get_Ascend_use.py
-        - database
-            - insert_mysql.py
-            - replace_mysql.py
-        - get_ones
-            - get_ones_sask.py
-            - get_weibo.py
-            - test1.py
-            - test2.py
-        - get_slurm_use_time
-            - get_slurm_1984autolink.py
-        - GitHub_CI
-            - get_jobs.py
-            - get_runner.py
-            - get_tags.py
-            - get_workflow.py
-    - shell
-        - database
-            - insert_mysql.sh
-            - mysqldump.sh
-            - rewrite_job_result.sh
-        - init
-            - init_centos6or7.sh
-            - init_centos6or7_v2.sh
-            - init_centos8.sh
-        - install
-            - docker_install.sh
-        - other_scripts
-            - check_packages.sh
-            - command_remote.sh
-            - df.sh
-            - eth0.sh
-            - README.md
-            - service_monitoring.sh
-            - trojan-go.sh
-            - url_monitoring.sh
-        - vpn
-            - centos_install_ss.sh
-            - centos_install_ssr.sh
-            - centos_install_v2ray.sh
-            - centos_install_v2ray2.sh
-            - goV2.sh
-            - mtproto.sh
-            - README.md
-            - ss.sh
-            - ssr.sh
-            - trojan-go.sh
-            - trojan.sh
-            - ubuntu_install_ss.sh
-            - ubuntu_install_ssr.sh
-            - ubuntu_install_v2ray.sh
-            - ubuntu_install_v2ray2.sh
-            - v2ray.sh
-            - wordpress.sh
-            - wordpress_trojan-go.sh
-            - wordpress_trojan.sh
-            - xray.sh
+## Devops  脚本库
+
+这是一个个人脚本仓库，用于存放日常开发、运维或自动化任务中使用的各类脚本。脚本语言可能包括 Shell、Python、PowerShell 等，具体取决于使用场景。
+
+
+
+## 免责声明
+
+本仓库中的所有脚本仅供学习与研究使用，不保证适用于任何特定场景。使用这些脚本可能会对系统配置、网络环境或数据库数据造成影响，作者不承担由此引发的任何直接或间接损失责任。  
+
+- 在使用前请务必仔细阅读脚本内容，理解其作用。  
+- 请在测试环境中验证脚本功能，再决定是否应用于生产环境。  
+- 对于涉及数据库、网络、VPN 等敏感操作的脚本，请自行确保符合所在国家/地区的法律法规。  
+- 使用过程中出现的任何问题或风险，由使用者自行承担。  

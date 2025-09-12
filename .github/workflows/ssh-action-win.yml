@@ -1,55 +1,99 @@
-name: Start SSH Server (Windows)
+name: Actions (windows)
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 jobs:
-  start-ssh-server:
+  test-windows:
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.10.9
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.8.3
-      - name: 安装 SSH 服务器
+          python-version: '3.10.9'
+      
+      - name: 检查系统信息
         run: |
-          Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
-          net user runneradmin Passwd123.@
-          Start-Service sshd
-          Get-Service -Name sshd
-          Set-Service -Name sshd -StartupType 'Automatic'
-          New-Item -ItemType Directory -Path C:\Users\runneradmin\.ssh -Force
-          Set-Content -Path C:\Users\runneradmin\.ssh\authorized_keys -Value "${{ secrets.ID_RSA_PUB }}"
-          icacls "C:\Users\runneradmin\.ssh\authorized_keys" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F"
+          Write-Host "🔹 系统信息："
+          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, TotalPhysicalMemory
+          Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, Size, FreeSpace
 
-      - name: 安装 ngrok 并暴露 SSH 端口
+      - name: 扩大空间
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'windows'
+
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'windows'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+          username: 'runneradmin'
+          password: 'Passwd123.@'
+
+      - name: 挂载 Google Drive (rclone)
+        uses: ./.github/actions/mount-drive
+        with:
+          platform: 'windows'
+          rclone_config: ${{ secrets.RCLONE_CONF_BASE64 }}
+          mount_point: 'C:\mnt\google-drive'
+          drive_name: 'google-drive'
+
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'windows'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: 'C:\mnt\share'
+
+      - name: 安装 ngrok 并暴露端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'windows'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
+
+      - name: 安装 Cloudflared 隧道
+        uses: ./.github/actions/cloudflared-tunnel
+        with:
+          platform: 'windows'
+          tunnel_token: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
+          log_file: 'cloudflared.log'
+
+      - name: 获取访问地址
         run: |
-          Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile ngrok.zip
-          Expand-Archive -Path ngrok.zip -DestinationPath C:\ngrok
-          C:\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          Start-Process -FilePath C:\ngrok\ngrok.exe -ArgumentList "tcp 22" -NoNewWindow -PassThru
           Start-Sleep -Seconds 5
-          Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels
-          $ssh_address = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels
-          if ($ssh_address -is [string]) {
-              $ssh_address = $ssh_address | ConvertFrom-Json
+          # 获取 ngrok 地址
+          try {
+            $tunnels = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels" -ErrorAction SilentlyContinue
+            if ($tunnels.tunnels.Count -gt 0) {
+              $public_url = $tunnels.tunnels[0].public_url
+              Write-Output "🔹 ngrok SSH 地址：$public_url"
+              $public_url | Out-File -FilePath "ssh_address.txt" -Encoding UTF8
+            }
+          } catch {
+            Write-Host "❌ 无法获取 ngrok 地址"
           }
           
-          if ($ssh_address.tunnels.Count -gt 0) {
-              $public_url = $ssh_address.tunnels[0].public_url
-              Write-Output "🔹 你的 SSH 地址：$public_url"
-          } else {
-              Write-Output "❌ 获取 ngrok 公开地址失败"
+          # 检查 cloudflared 状态
+          if (Test-Path "cloudflared.log") {
+            Write-Host "🔹 Cloudflared 隧道已启动，请查看日志获取连接信息"
+            Get-Content "cloudflared.log" -Tail 5
           }
-          echo $public_url > ssh_address.txt
-          $ssh_address = Get-Content ssh_address.txt
-          $ssh_host = $ssh_address -replace "tcp://([^:]+):([0-9]+)", '$1'
-          $ssh_port = $ssh_address -replace "tcp://([^:]+):([0-9]+)", '$2'
-          echo "🔹 使用以下命令连接到服务器："
-          echo "   ssh runneradmin@$ssh_host -p $ssh_port"
-          Start-Sleep -Seconds 18000
 
+      - name: 输出连接信息
+        run: |
+          Write-Host "🔹 可用的隧道服务："
+          if (Test-Path "ssh_address.txt") {
+            $ssh_address = Get-Content "ssh_address.txt"
+            $ssh_host = $ssh_address -replace "tcp://([^:]+):([0-9]+)", '$1'
+            $ssh_port = $ssh_address -replace "tcp://([^:]+):([0-9]+)", '$2'
+            Write-Host "   - ngrok SSH: ssh runneradmin@${ssh_host} -p ${ssh_port}  密码：Passwd123.@ "
+          }
+          Write-Host "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
+          Start-Sleep -Seconds 18000  

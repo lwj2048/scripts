@@ -16,7 +16,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: 安装 Cloudflared (Ubuntu/Debian)
+    - name: 安装 Cloudflared (Ubuntu)
       if: ${{ inputs.platform == 'ubuntu' }}
       shell: bash
       run: |

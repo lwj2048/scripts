@@ -1,42 +1,40 @@
 name: firefox chrome
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 jobs:
   start-web-server:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - name: 安装 davfs2
-        run: sudo apt update && sudo apt install -y davfs2
+          python-version: '3.10.9'
 
-      - name: 创建挂载目录
-        run: sudo mkdir -p /mnt/share
-
-      - name: 配置凭据文件（root 访问）
-        run: |
-          echo "https://app.koofr.net/dav/Koofr/ ${{ secrets.KOOFR_USERNAME }} ${{ secrets.KOOFR_PASSWORD }}" | sudo tee /etc/davfs2/secrets > /dev/null
-          sudo chmod 600 /etc/davfs2/secrets
-      - name: 允许 root 访问 WebDAV
-        run: echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
-
-      - name: 以 root 挂载 Koofr
-        run: sudo mount -t davfs https://app.koofr.net/dav/Koofr/ /mnt/share
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
         
       - name: 部署火狐
         run: |
           sudo docker run -d --name firefox -e VNC_PASSWORD=${{ secrets.FIREFOX_PASSWORD }} -e ENABLE_CJK_FONT=1 -p 5800:5800 jlesage/firefox
-      - name: 安装 ngrok 并暴露端口
-        run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-          sudo apt update && sudo apt install -y ngrok
-          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN2 }}
-          nohup ngrok http 5800 > /dev/null 2>&1 &  
+      
+      - name: 安装 ngrok 并暴露 SSH 端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
+          port: '5800'
+          protocol: 'http'
+ 
       - name: 访问地址
         run: |
           sleep 5

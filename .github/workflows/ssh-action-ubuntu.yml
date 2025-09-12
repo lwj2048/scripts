@@ -1,61 +1,100 @@
-name: Start SSH Server
-
+name: Actions (linux)
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 jobs:
-  start-ssh-server:
+  test-linux:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.10.9'
 
-      - name:  挂载
+      - name: 检查系统信息
         run: |
-          sudo apt update && sudo apt install -y fuse3
-          sudo mkdir -p /mnt/google-drive
-          curl https://rclone.org/install.sh | sudo bash
-          mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 -d > ~/.config/rclone/rclone.conf
-          sudo rclone mount google-drive: /mnt/google-drive --allow-other --vfs-cache-mode writes --daemon
-      - name: 安装 SSH 服务器
-        run: |
-          sudo apt update && sudo apt install -y openssh-server
-          sudo systemctl start ssh
-          echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
-          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
-          # 确保 SSH 目录和权限正确
-          sudo mkdir -p /root/.ssh
-          sudo chmod 700 /root/.ssh
-          # 追加公钥到 authorized_keys
-          echo "${{ secrets.ID_RSA_PUB }}" | sudo tee -a /root/.ssh/authorized_keys
-          # 设置正确权限
-          sudo chmod 600 /root/.ssh/authorized_keys
-          sudo chown -R root:root /root/.ssh
-      - name: 安装 ngrok 并暴露 SSH 端口
-        run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-          sudo apt update && sudo apt install -y ngrok
-          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          nohup ngrok tcp 22 > /dev/null 2>&1 &  # 暴露 SSH 端口
-          
+          echo "�� 系统信息："
+          uname -a
+          lsb_release -a
+          df -h
+
       - name: 扩大空间
-        run: |
-          sudo rm -rf /usr/local/lib/android/sdk &
-          sudo rm -rf /opt/hostedtoolcache &
-          sudo rm -rf rm -rf /usr/local/.ghcup &
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'ubuntu'
 
-      - name: 获取 SSH 访问地址
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'ubuntu'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+
+      - name: 挂载 Google Drive (rclone)
+        uses: ./.github/actions/mount-drive
+        with:
+          platform: 'ubuntu'
+          rclone_config: ${{ secrets.RCLONE_CONF_BASE64 }}
+          mount_point: '/mnt/google-drive'
+          drive_name: 'google-drive'
+
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
+
+      - name: 安装 ngrok 并暴露端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
+
+      - name: 安装 Cloudflared 隧道
+        uses: ./.github/actions/cloudflared-tunnel
+        with:
+          platform: 'ubuntu'
+          tunnel_token: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
+          log_file: 'cloudflared.log'
+
+      - name: 验证挂载点
+        run: |
+          echo "🔹 挂载点状态："
+          df -h | grep -E "(google-drive|share)"
+          ls -la /mnt/
+
+      - name: 获取访问地址
         run: |
           sleep 5
-          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
-          echo "🔹 你的 SSH 地址：" $(cat ssh_address.txt)
+          # 获取 ngrok 地址
+          if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
+            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+            echo "🔹 ngrok SSH 地址：" $(cat ssh_address.txt)
+          fi
+          
+          # 检查 cloudflared 状态
+          if [ -f "cloudflared.log" ]; then
+            echo "�� Cloudflared 隧道已启动，请查看日志获取连接信息"
+            tail -n 5 cloudflared.log
+          fi
 
-      - name: 输出 SSH 连接方式
+      - name: 输出连接信息
         run: |
-          echo "🔹 使用以下命令连接到服务器："
-          echo " ssh root@$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#') -p $(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#') "
-          sleep 5h
+          echo "🔹 测试完成！"
+          echo "🔹 可用的挂载点："
+          echo "   - Google Drive: /mnt/google-drive"
+          echo "   - Koofr: /mnt/share"
+          echo "🔹 可用的隧道服务："
+          if [ -f "ssh_address.txt" ]; then
+            SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+            SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+            echo "   - ngrok SSH: ssh root@${SSH_HOST} -p ${SSH_PORT}"
+          fi
+          echo "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
+          sleep 300  # 保持5分钟用于测试 

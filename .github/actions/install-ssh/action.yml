@@ -19,7 +19,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: 安装 SSH 服务 (Ubuntu/Debian)
+    - name: 安装 SSH 服务 (Ubuntu)
       if: ${{ inputs.platform == 'ubuntu' }}
       shell: bash
       run: |

@@ -1,0 +1,47 @@
+name: '安装 Cloudflared 隧道'
+description: '安装 Cloudflared 并启动隧道连接，支持多平台'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+  tunnel_token:
+    description: 'Cloudflare 隧道令牌'
+    required: true
+  log_file:
+    description: '日志文件路径'
+    required: false
+    default: 'cloudflared.log'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 安装 Cloudflared (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        # Add cloudflare gpg key
+        sudo mkdir -p --mode=0755 /usr/share/keyrings
+        curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+        # Add this repo to your apt repositories
+        echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+        # install cloudflared
+        sudo apt-get update && sudo apt-get install cloudflared
+
+    - name: 安装 Cloudflared (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        brew install cloudflared
+
+    - name: 安装 Cloudflared (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        choco install cloudflared
+
+    - name: 启动 Cloudflared 隧道
+      shell: bash
+      run: |
+        sudo nohup cloudflared tunnel run --token ${{ inputs.tunnel_token }} > ${{ inputs.log_file }} 2>&1 &
+        echo "Cloudflared 隧道已启动，日志文件: ${{ inputs.log_file }}" 

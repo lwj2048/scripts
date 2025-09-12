@@ -1,0 +1,63 @@
+name: 使用自定义 Actions 示例
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 扩大空间
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'ubuntu'
+
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'ubuntu'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+          username: 'root'
+
+      # 选择使用 rclone 挂载 Google Drive
+      - name: 挂载 Google Drive (rclone)
+        uses: ./.github/actions/mount-drive
+        with:
+          platform: 'ubuntu'
+          rclone_config: ${{ secrets.RCLONE_CONF_BASE64 }}
+          mount_point: '/mnt/google-drive'
+          drive_name: 'google-drive'
+
+      # 或者使用 davfs2 挂载 Koofr
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
+
+      - name: 使用 ngrok 暴露 SSH 端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
+
+      - name: 使用 Cloudflared 隧道
+        uses: ./.github/actions/cloudflared-tunnel
+        with:
+          platform: 'ubuntu'
+          tunnel_token: ${{ secrets.Cloudflare_tunnel_kubesphere_token }}
+          log_file: 'cloudflared.log'
+
+      - name: 获取访问地址
+        run: |
+          sleep 5
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+          echo " SSH 地址：" $(cat ssh_address.txt)
+          echo " 挂载点："
+          echo "  - Google Drive: /mnt/google-drive"
+          echo "  - Koofr: /mnt/share" 

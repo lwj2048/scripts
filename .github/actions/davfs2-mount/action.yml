@@ -1,0 +1,78 @@
+name: '挂载 WebDAV 存储'
+description: '使用 davfs2 挂载 WebDAV 存储服务，支持多平台'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+  webdav_url:
+    description: 'WebDAV 服务 URL'
+    required: true
+  username:
+    description: 'WebDAV 用户名'
+    required: true
+  password:
+    description: 'WebDAV 密码'
+    required: true
+  mount_point:
+    description: '挂载点路径'
+    required: false
+    default: '/mnt/share'
+  allow_root:
+    description: '是否允许 root 访问'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 安装 davfs2 (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        sudo apt update && sudo apt install -y davfs2
+
+    - name: 安装 davfs2 (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        brew install davfs2
+
+    - name: 安装 davfs2 (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        # Windows 使用 WebDAV 客户端
+        Write-Host "Windows 系统将使用内置 WebDAV 客户端"
+
+    - name: 创建挂载目录
+      shell: bash
+      run: |
+        sudo mkdir -p ${{ inputs.mount_point }}
+
+    - name: 配置凭据文件
+      shell: bash
+      run: |
+        echo "${{ inputs.webdav_url }} ${{ inputs.username }} ${{ inputs.password }}" | sudo tee /etc/davfs2/secrets > /dev/null
+        sudo chmod 600 /etc/davfs2/secrets
+
+    - name: 配置 davfs2 允许 root 访问
+      if: ${{ inputs.allow_root == 'true' }}
+      shell: bash
+      run: |
+        echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
+
+    - name: 挂载 WebDAV
+      shell: bash
+      run: |
+        sudo mount -t davfs ${{ inputs.webdav_url }} ${{ inputs.mount_point }}
+        echo "WebDAV 已挂载到 ${{ inputs.mount_point }}"
+
+    - name: 挂载 WebDAV (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        # Windows 使用 net use 命令挂载 WebDAV
+        $webdavPath = ${{ inputs.webdav_url }}.Replace("https://", "\\").Replace("/", "\")
+        net use Z: $webdavPath /user:${{ inputs.username }} ${{ inputs.password }}
+        Write-Host "WebDAV 已挂载到 Z: 盘" 

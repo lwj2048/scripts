@@ -1,4 +1,4 @@
-name: 测试 macOS Actions
+name: macOS Actions
 
 on:
   workflow_dispatch:  # 手动触发
@@ -7,6 +7,8 @@ jobs:
   test-macos:
     runs-on: macos-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: 检查系统信息
         run: |
           echo "🔹 系统信息："
@@ -92,4 +94,4 @@ jobs:
             echo "   - ngrok SSH: ssh runner@${SSH_HOST} -p ${SSH_PORT}"
           fi
           echo "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
-          sleep 300  # 保持5分钟用于测试 
+          sleep 5h

@@ -7,6 +7,8 @@ jobs:
   test-windows:
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: 检查系统信息
         run: |
           Write-Host "🔹 系统信息："

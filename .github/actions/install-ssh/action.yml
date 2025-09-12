@@ -44,11 +44,13 @@ runs:
     - name: 配置 SSH 密钥
       shell: bash
       run: |
-        # 确保 SSH 目录和权限正确
-        sudo mkdir -p /home/${{ inputs.username }}/.ssh
-        sudo chmod 700 /home/${{ inputs.username }}/.ssh
-        # 追加公钥到 authorized_keys
-        echo "${{ inputs.public_key }}" | sudo tee -a /home/${{ inputs.username }}/.ssh/authorized_keys
-        # 设置正确权限
-        sudo chmod 600 /home/${{ inputs.username }}/.ssh/authorized_keys
-        sudo chown -R ${{ inputs.username }}:${{ inputs.username }} /home/${{ inputs.username }}/.ssh 
+        if [ "${{ inputs.username }}" = "root" ]; then
+          USER_HOME="/root"
+        else
+          USER_HOME="/home/${{ inputs.username }}"
+        fi
+        sudo mkdir -p $USER_HOME/.ssh
+        sudo chmod 700 $USER_HOME/.ssh
+        echo "${{ inputs.public_key }}" | sudo tee -a $USER_HOME/.ssh/authorized_keys
+        sudo chmod 600 $USER_HOME/.ssh/authorized_keys
+        sudo chown -R ${{ inputs.username }}:${{ inputs.username }} $USER_HOME/.ssh

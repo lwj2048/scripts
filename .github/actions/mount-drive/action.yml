@@ -26,25 +26,20 @@ runs:
       run: |
         sudo apt update && sudo apt install -y fuse3
         curl https://rclone.org/install.sh | sudo bash
-
-    - name: 安装 rclone (macOS)
-      if: ${{ inputs.platform == 'macos' }}
-      shell: bash
-      run: |
-        brew install rclone
-        brew install macfuse
-
-    - name: 安装 rclone (Windows)
-      if: ${{ inputs.platform == 'windows' }}
-      shell: powershell
-      run: |
-        choco install rclone
-
-    - name: 配置和挂载驱动器
-      shell: bash
-      run: |
         mkdir -p ~/.config/rclone
         echo "${{ inputs.rclone_config }}" | base64 -d > ~/.config/rclone/rclone.conf
         sudo mkdir -p ${{ inputs.mount_point }}
         sudo rclone mount ${{ inputs.drive_name }}: ${{ inputs.mount_point }} --allow-other --vfs-cache-mode writes --daemon
         echo "驱动器已挂载到 ${{ inputs.mount_point }}"
+
+    - name: 安装 rclone (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        echo "暂不支持"
+
+    - name: 安装 rclone (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: bash
+      run: |
+        echo "暂不支持"

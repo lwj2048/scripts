@@ -12,6 +12,9 @@ inputs:
     description: 'SSH 用户名'
     required: false
     default: 'root'
+  password:
+    description: 'SSH 密码'
+    required: false
 
 runs:
   using: 'composite'
@@ -65,7 +68,7 @@ runs:
       shell: pwsh
       run: |
         Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
-        net user ${{ inputs.username }} Passwd123.@
+        net user ${{ inputs.username }} ${{ inputs.password }}
         Start-Service sshd
         Get-Service -Name sshd
         Set-Service -Name sshd -StartupType 'Automatic'

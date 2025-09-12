@@ -1,0 +1,50 @@
+name: '挂载云存储'
+description: '使用 rclone 挂载云存储驱动器'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+  rclone_config:
+    description: 'rclone 配置文件的 base64 编码'
+    required: true
+  mount_point:
+    description: '挂载点路径'
+    required: false
+    default: '/mnt/google-drive'
+  drive_name:
+    description: '驱动器名称'
+    required: false
+    default: 'google-drive'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 安装 rclone (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        sudo apt update && sudo apt install -y fuse3
+        curl https://rclone.org/install.sh | sudo bash
+
+    - name: 安装 rclone (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        brew install rclone
+        brew install macfuse
+
+    - name: 安装 rclone (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        choco install rclone
+
+    - name: 配置和挂载驱动器
+      shell: bash
+      run: |
+        mkdir -p ~/.config/rclone
+        echo "${{ inputs.rclone_config }}" | base64 -d > ~/.config/rclone/rclone.conf
+        sudo mkdir -p ${{ inputs.mount_point }}
+        sudo rclone mount ${{ inputs.drive_name }}: ${{ inputs.mount_point }} --allow-other --vfs-cache-mode writes --daemon
+        echo "驱动器已挂载到 ${{ inputs.mount_point }}"

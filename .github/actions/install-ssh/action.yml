@@ -1,0 +1,54 @@
+name: '安装 SSH 服务'
+description: '安装和配置 SSH 服务，支持多平台'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+  public_key:
+    description: 'SSH 公钥'
+    required: true
+  username:
+    description: 'SSH 用户名'
+    required: false
+    default: 'root'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 安装 SSH 服务 (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        sudo apt update && sudo apt install -y openssh-server
+        sudo systemctl start ssh
+        echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config
+        echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
+        sudo systemctl restart ssh
+
+    - name: 安装 SSH 服务 (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        sudo systemsetup -setremotelogin on
+        echo "macOS SSH 服务已启用"
+
+    - name: 安装 SSH 服务 (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+        Start-Service sshd
+        Set-Service -Name sshd -StartupType 'Automatic'
+
+    - name: 配置 SSH 密钥
+      shell: bash
+      run: |
+        # 确保 SSH 目录和权限正确
+        sudo mkdir -p /home/${{ inputs.username }}/.ssh
+        sudo chmod 700 /home/${{ inputs.username }}/.ssh
+        # 追加公钥到 authorized_keys
+        echo "${{ inputs.public_key }}" | sudo tee -a /home/${{ inputs.username }}/.ssh/authorized_keys
+        # 设置正确权限
+        sudo chmod 600 /home/${{ inputs.username }}/.ssh/authorized_keys
+        sudo chown -R ${{ inputs.username }}:${{ inputs.username }} /home/${{ inputs.username }}/.ssh 

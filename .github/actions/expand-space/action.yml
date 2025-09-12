@@ -1,0 +1,40 @@
+name: '扩大空间'
+description: '清理系统空间，删除不必要的文件以扩大可用空间'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 清理空间 (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        echo "开始清理 Ubuntu 系统空间..."
+        sudo rm -rf /usr/local/lib/android/sdk &
+        sudo rm -rf /opt/hostedtoolcache &
+        sudo rm -rf /usr/local/.ghcup &
+        sudo apt autoremove -y
+        sudo apt autoclean
+        echo "Ubuntu 空间清理完成"
+
+    - name: 清理空间 (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        echo "开始清理 macOS 系统空间..."
+        rm -rf ~/Library/Caches/*
+        brew cleanup
+        echo "macOS 空间清理完成"
+
+    - name: 清理空间 (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        Write-Host "开始清理 Windows 系统空间..."
+        Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Temp\*" -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force "$env:TEMP\*" -ErrorAction SilentlyContinue
+        Write-Host "Windows 空间清理完成" 

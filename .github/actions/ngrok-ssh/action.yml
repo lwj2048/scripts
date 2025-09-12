@@ -1,0 +1,48 @@
+name: '安装 ngrok 并暴露 SSH 端口'
+description: '安装 ngrok 并暴露 SSH 端口，支持多平台'
+inputs:
+  platform:
+    description: '目标平台 (ubuntu/macos/windows)'
+    required: true
+    default: 'ubuntu'
+  auth_token:
+    description: 'ngrok 认证令牌'
+    required: true
+  port:
+    description: '要暴露的端口'
+    required: false
+    default: '22'
+  protocol:
+    description: '协议类型 (tcp/http)'
+    required: false
+    default: 'tcp'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 安装 ngrok (Ubuntu/Debian)
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+        sudo apt update && sudo apt install -y ngrok
+
+    - name: 安装 ngrok (macOS)
+      if: ${{ inputs.platform == 'macos' }}
+      shell: bash
+      run: |
+        brew install ngrok/ngrok/ngrok
+
+    - name: 安装 ngrok (Windows)
+      if: ${{ inputs.platform == 'windows' }}
+      shell: powershell
+      run: |
+        choco install ngrok
+
+    - name: 配置 ngrok 并启动
+      shell: bash
+      run: |
+        ngrok config add-authtoken ${{ inputs.auth_token }}
+        nohup ngrok ${{ inputs.protocol }} ${{ inputs.port }} > /dev/null 2>&1 &
+        echo "ngrok 已启动，暴露端口 ${{ inputs.port }}"

@@ -43,9 +43,9 @@ runs:
 
     - name: 安装 davfs2 (Windows)
       if: ${{ inputs.platform == 'windows' }}
-      shell: powershell
+      shell: bash
       run: |
-        Write-Output "暂不支持"
+        echo "暂不支持"
 
         
 

@@ -39,10 +39,10 @@ runs:
         sudo launchctl stop com.openssh.sshd
         sudo launchctl start com.openssh.sshd
         echo "✅ 已允许 Root 登录"
-        mkdir -p /Users/runner/.ssh
-        chmod 700 /Users/runner/.ssh
-        echo "{{ inputs.public_key }}" >> /Users/runner/.ssh/authorized_keys
-        chmod 600 /Users/runner/.ssh/authorized_keys
+        sudo mkdir -p /var/root/.ssh
+        sudo chmod 700 /var/root/.ssh
+        sudo echo "{{ inputs.public_key }}" >> /var/root/.ssh/authorized_keys
+        sudo chmod 600 /var/root/.ssh/authorized_keys
         echo "✅ SSH 公钥已添加"
 
     - name: 安装 SSH 服务 (Windows)

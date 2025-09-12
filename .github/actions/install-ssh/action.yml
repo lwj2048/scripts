@@ -31,7 +31,19 @@ runs:
       shell: bash
       run: |
         sudo systemsetup -setremotelogin on
+        sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+        sudo launchctl kickstart -k system/com.openssh.sshd
         echo "macOS SSH 服务已启用"
+        sudo sh -c 'echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
+        sudo sh -c 'echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config'
+        sudo launchctl stop com.openssh.sshd
+        sudo launchctl start com.openssh.sshd
+        echo "✅ 已允许 Root 登录"
+        mkdir -p /Users/runner/.ssh
+        chmod 700 /Users/runner/.ssh
+        echo "{{ inputs.public_key }}" >> /Users/runner/.ssh/authorized_keys
+        chmod 600 /Users/runner/.ssh/authorized_keys
+        echo "✅ SSH 公钥已添加"
 
     - name: 安装 SSH 服务 (Windows)
       if: ${{ inputs.platform == 'windows' }}
@@ -42,6 +54,7 @@ runs:
         Set-Service -Name sshd -StartupType 'Automatic'
 
     - name: 配置 SSH 密钥
+      if: ${{ inputs.platform == 'ubuntu' }}
       shell: bash
       run: |
         if [ "${{ inputs.username }}" = "root" ]; then

@@ -1,4 +1,4 @@
-name: 测试 Windows Actions
+name: Windows Actions
 
 on:
   workflow_dispatch:  # 手动触发
@@ -59,14 +59,6 @@ jobs:
           tunnel_token: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
           log_file: 'cloudflared.log'
 
-      - name: 验证挂载点
-        run: |
-          Write-Host "🔹 挂载点状态："
-          Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -like "*:"} | Select-Object DeviceID, Size, FreeSpace
-          if (Test-Path "C:\mnt") {
-            Get-ChildItem "C:\mnt" -Recurse
-          }
-
       - name: 获取访问地址
         run: |
           Start-Sleep -Seconds 5
@@ -90,10 +82,6 @@ jobs:
 
       - name: 输出连接信息
         run: |
-          Write-Host "🔹 测试完成！"
-          Write-Host "🔹 可用的挂载点："
-          Write-Host "   - Google Drive: C:\mnt\google-drive"
-          Write-Host "   - Koofr: Z: 盘 (WebDAV)"
           Write-Host "🔹 可用的隧道服务："
           if (Test-Path "ssh_address.txt") {
             $ssh_address = Get-Content "ssh_address.txt"
@@ -102,4 +90,4 @@ jobs:
             Write-Host "   - ngrok SSH: ssh runneradmin@${ssh_host} -p ${ssh_port}"
           }
           Write-Host "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
-          Start-Sleep -Seconds 300  # 保持5分钟用于测试 
+          Start-Sleep -Seconds 18000  

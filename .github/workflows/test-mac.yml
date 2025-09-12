@@ -26,7 +26,6 @@ jobs:
         with:
           platform: 'macos'
           public_key: ${{ secrets.ID_RSA_PUB }}
-          username: 'runner'
 
       - name: 挂载 Google Drive (rclone)
         uses: ./.github/actions/mount-drive
@@ -50,8 +49,6 @@ jobs:
         with:
           platform: 'macos'
           auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
-          port: '22'
-          protocol: 'tcp'
 
       - name: 安装 Cloudflared 隧道
         uses: ./.github/actions/cloudflared-tunnel

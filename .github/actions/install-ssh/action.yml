@@ -26,6 +26,21 @@ runs:
         echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
         sudo systemctl restart ssh
 
+    - name: 配置 SSH 密钥
+      if: ${{ inputs.platform == 'ubuntu' }}
+      shell: bash
+      run: |
+        if [ "${{ inputs.username }}" = "root" ]; then
+          USER_HOME="/root"
+        else
+          USER_HOME="/home/${{ inputs.username }}"
+        fi
+        sudo mkdir -p $USER_HOME/.ssh
+        sudo chmod 700 $USER_HOME/.ssh
+        echo "${{ inputs.public_key }}" | sudo tee -a $USER_HOME/.ssh/authorized_keys
+        sudo chmod 600 $USER_HOME/.ssh/authorized_keys
+        sudo chown -R ${{ inputs.username }}:${{ inputs.username }} $USER_HOME/.ssh
+        
     - name: 安装 SSH 服务 (macOS)
       if: ${{ inputs.platform == 'macos' }}
       shell: bash
@@ -47,23 +62,12 @@ runs:
 
     - name: 安装 SSH 服务 (Windows)
       if: ${{ inputs.platform == 'windows' }}
-      shell: powershell
       run: |
-        Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+        Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
+        net user ${{ inputs.username }} Passwd123.@
         Start-Service sshd
+        Get-Service -Name sshd
         Set-Service -Name sshd -StartupType 'Automatic'
-
-    - name: 配置 SSH 密钥
-      if: ${{ inputs.platform == 'ubuntu' }}
-      shell: bash
-      run: |
-        if [ "${{ inputs.username }}" = "root" ]; then
-          USER_HOME="/root"
-        else
-          USER_HOME="/home/${{ inputs.username }}"
-        fi
-        sudo mkdir -p $USER_HOME/.ssh
-        sudo chmod 700 $USER_HOME/.ssh
-        echo "${{ inputs.public_key }}" | sudo tee -a $USER_HOME/.ssh/authorized_keys
-        sudo chmod 600 $USER_HOME/.ssh/authorized_keys
-        sudo chown -R ${{ inputs.username }}:${{ inputs.username }} $USER_HOME/.ssh
+        New-Item -ItemType Directory -Path C:\Users\${{ inputs.username }}\.ssh -Force
+        Set-Content -Path C:\Users\${{ inputs.username }}\.ssh\authorized_keys -Value "${{ secrets.ID_RSA_PUB }}"
+        icacls "C:\Users\${{ inputs.username }}\.ssh\authorized_keys" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F"

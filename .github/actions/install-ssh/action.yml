@@ -62,6 +62,7 @@ runs:
 
     - name: 安装 SSH 服务 (Windows)
       if: ${{ inputs.platform == 'windows' }}
+      shell: pwsh
       run: |
         Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' | Add-WindowsCapability -Online
         net user ${{ inputs.username }} Passwd123.@

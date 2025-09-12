@@ -1,4 +1,4 @@
-name: 测试 Linux ARM Actions
+name: Linux ARM Actions
 
 on:
   workflow_dispatch:  # 手动触发
@@ -7,6 +7,8 @@ jobs:
   test-linux-arm:
     runs-on: ubuntu-24.04-arm
     steps:
+      - uses: actions/checkout@v4
+      
       - name: 检查系统信息
         run: |
           echo "�� 系统信息："
@@ -44,7 +46,7 @@ jobs:
           password: ${{ secrets.KOOFR_PASSWORD }}
           mount_point: '/mnt/share'
 
-      - name: 安装 ngrok 并暴露 SSH 端口
+      - name: 安装 ngrok 并暴露端口
         uses: ./.github/actions/ngrok-ssh
         with:
           platform: 'ubuntu'
@@ -94,4 +96,4 @@ jobs:
             echo "   - ngrok SSH: ssh root@${SSH_HOST} -p ${SSH_PORT}"
           fi
           echo "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
-          sleep 300  # 保持5分钟用于测试 
+          sleep 5h 

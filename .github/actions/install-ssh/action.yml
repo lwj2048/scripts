@@ -41,12 +41,8 @@ runs:
         echo "✅ 已允许 Root 登录"
         sudo mkdir -p /var/root/.ssh
         sudo chmod 700 /var/root/.ssh
-        echo "{{ inputs.public_key }}" | sudo tee -a /var/root/.ssh/authorized_keys > /dev/null
+        echo "${{ inputs.public_key }}" | sudo tee -a /var/root/.ssh/authorized_keys > /dev/null
         sudo chmod 600 /var/root/.ssh/authorized_keys
-        mkdir -p /Users/runner/.ssh
-        chmod 700 /Users/runner/.ssh
-        echo "${{ inputs.public_key }}" >> /Users/runner/.ssh/authorized_keys
-        chmod 600 /Users/runner/.ssh/authorized_keys
         echo "✅ SSH 公钥已添加"
 
     - name: 安装 SSH 服务 (Windows)

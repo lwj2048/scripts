@@ -60,12 +60,6 @@ jobs:
           tunnel_token: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
           log_file: 'cloudflared.log'
 
-      - name: 验证挂载点
-        run: |
-          echo "🔹 挂载点状态："
-          df -h | grep -E "(google-drive|share)"
-          ls -la /mnt/
-
       - name: 获取访问地址
         run: |
           sleep 5
@@ -83,10 +77,6 @@ jobs:
 
       - name: 输出连接信息
         run: |
-          echo "🔹 测试完成！"
-          echo "🔹 可用的挂载点："
-          echo "   - Google Drive: /mnt/google-drive"
-          echo "   - Koofr: /mnt/share"
           echo "🔹 可用的隧道服务："
           if [ -f "ssh_address.txt" ]; then
             SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')

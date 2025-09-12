@@ -69,5 +69,5 @@ runs:
         Get-Service -Name sshd
         Set-Service -Name sshd -StartupType 'Automatic'
         New-Item -ItemType Directory -Path C:\Users\${{ inputs.username }}\.ssh -Force
-        Set-Content -Path C:\Users\${{ inputs.username }}\.ssh\authorized_keys -Value "${{ secrets.ID_RSA_PUB }}"
+        Set-Content -Path C:\Users\${{ inputs.username }}\.ssh\authorized_keys -Value "${{ inputs.public_key }}"
         icacls "C:\Users\${{ inputs.username }}\.ssh\authorized_keys" /inheritance:r /grant:r "Administrators:F" "SYSTEM:F"

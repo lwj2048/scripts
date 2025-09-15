@@ -97,4 +97,4 @@ jobs:
             echo "   - ngrok SSH: ssh root@${SSH_HOST} -p ${SSH_PORT}"
           fi
           echo "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
-          sleep 300  # 保持5分钟用于测试 
+          sleep 5h 

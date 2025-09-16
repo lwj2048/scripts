@@ -1,0 +1,87 @@
+name: Actions (testcache)
+on:
+  workflow_dispatch:
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.9'
+
+      - name: 检查系统信息
+        run: |
+          echo "�� 系统信息："
+          uname -a
+          lsb_release -a
+          df -h
+          mkdir -p /home/runner/work1/1234
+          mkdir -p /home/runner/work2
+          touch /home/runner/work1/1234/456.txt
+
+      - name: Test Save Cache (without ci_path)
+        uses: lwj-st/cache/save@v4.2.4
+        with:
+          path: '1234'
+          key: 'lwj'
+          ci_path: '/home/runner/work1/'  
+
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'ubuntu'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+
+
+      - name: 安装 ngrok 并暴露端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
+
+      - name: Test Restore Cache (with ci_path)
+        uses: lwj-st/cache/restore@v4.2.4
+        with:
+          path: '1234'  # 相对路径，因为会切换到 test-ci-dir
+          key: 'lwj'
+          ci_path: '/home/runner/work2/' 
+
+      - name: 获取访问地址
+        run: |
+          pwd
+          ls /home/runner/work2
+          echo "--------------------------------------------"
+          ls /home/runner/work2/1234
+          sleep 5
+          # 获取 ngrok 地址
+          if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
+            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+            echo "🔹 ngrok SSH 地址：" $(cat ssh_address.txt)
+          fi
+          
+          # 检查 cloudflared 状态
+          if [ -f "cloudflared.log" ]; then
+            echo "�� Cloudflared 隧道已启动，请查看日志获取连接信息"
+            tail -n 5 cloudflared.log
+          fi
+
+      - name: 输出连接信息
+        run: |
+          echo "🔹 测试完成！"
+          echo "🔹 可用的挂载点："
+          echo "   - Google Drive: /mnt/google-drive"
+          echo "   - Koofr: /mnt/share"
+          echo "🔹 可用的隧道服务："
+          if [ -f "ssh_address.txt" ]; then
+            SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+            SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+            echo "   - ngrok SSH: ssh root@${SSH_HOST} -p ${SSH_PORT}"
+          fi
+          echo "   - Cloudflared: 请查看 cloudflared.log 获取连接信息"
+          sleep 5h 

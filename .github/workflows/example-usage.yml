@@ -53,6 +53,13 @@ jobs:
           tunnel_token: ${{ secrets.Cloudflare_tunnel_kubesphere_token }}
           log_file: 'cloudflared.log'
 
+      - name: 通知
+        uses: ./.github/actions/feishu-message
+        with:
+          title: '告警'
+          content: '内容'
+          webhook-key: ${{ secrets.FEISHU_WEBHOOK_KEY }}
+
       - name: 获取访问地址
         run: |
           sleep 5

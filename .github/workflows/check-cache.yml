@@ -24,11 +24,11 @@ jobs:
           touch /home/runner/work1/1234/456.txt
 
       - name: Test Save Cache (without ci_path)
-        uses: action/cache/save@v4
+        uses: lwj-st/cache/save@v4.2.4
         with:
           path: '1234'
-          key: 'lwj3'
-        working-directory: '/home/runner/work1/'  
+          key: 'lwj4'
+          ci_path: '/home/runner/work1/'  
 
       - name: 安装 SSH 服务
         uses: ./.github/actions/install-ssh
@@ -46,11 +46,11 @@ jobs:
           protocol: 'tcp'
 
       - name: Test Restore Cache (with ci_path)
-        uses: action/cache/restore@v4
+        uses: lwj-st/cache/restore@v4.2.4
         with:
           path: '1234'  # 相对路径，因为会切换到 test-ci-dir
-          key: 'lwj3'
-        working-directory: '/home/runner/work2/' 
+          key: 'lwj4'
+          ci_path: '/home/runner/work2/' 
 
       - name: 获取访问地址
         run: |

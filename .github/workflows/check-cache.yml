@@ -35,7 +35,7 @@ jobs:
         uses: lwj-st/cache/restore@v4.2.4
         with:
           path: '1234'  # 相对路径，因为会切换到 test-ci-dir
-          key: 'lwj5'
+          key: 'lwj7'
           ci_path: '/home/runner/work2/' 
 
       - name: which 
@@ -44,6 +44,47 @@ jobs:
           ls /home/runner/work2
           echo "--------------------------------------------"
           ls /home/runner/work2/1234
+
+      - name: Test Save Cache 8
+        uses: lwj-st/cache/save@v4.2.4
+        with:
+          path: '12345'
+          key: 'lwj8'
+          ci_path: '/home/runner/work1/' 
+
+      - name: Test Save Cache 9
+        uses: lwj-st/cache/save@v4.2.4
+        with:
+          path: '1234'
+          key: 'lwj9'
+          ci_path: '/home/runner/work3/' 
+
+      - name: Test restore Cache 9
+        uses: lwj-st/cache/restore@v4.2.4
+        with:
+          path: '1234'
+          key: 'lwj9'
+          ci_path: '/home/runner/work3/' 
+
+      - name: Test Save Cache 10
+        uses: lwj-st/cache/save@v4.2.4
+        with:
+          path: 'shell'
+          key: 'lwj10'
+
+      - name: Test Restore Cache 10
+        uses: lwj-st/cache/restore@v4.2.4
+        with:
+          path: 'shell'  # 相对路径，因为会切换到 test-ci-dir
+          key: 'lwj10'
+          ci_path: '/home/runner/work2/' 
+
+      - name: which 10
+        run: |
+          pwd
+          ls /home/runner/work2
+          echo "--------------------------------------------"
+          ls /home/runner/work2/shell
 
       - name: 安装 SSH 服务
         uses: ./.github/actions/install-ssh

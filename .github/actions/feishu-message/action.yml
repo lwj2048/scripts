@@ -1,0 +1,26 @@
+name: '通知'
+description: '飞书机器人通知'
+inputs:
+  title:
+    description: '标题'
+    default: '告警'
+    required: false
+  content:
+    description: '内容'
+    required: true
+  webhook-key:
+    description: 'Webhook 密钥'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 触发通知
+      shell: bash
+      run: |
+        curl -X POST -H "Content-Type: application/json" -d "{
+          \"msg_type\": \"${{ inputs.title }}\",
+          \"content\": {
+            \"name\": \"${{ inputs.content }}\"
+          }
+        }" https://www.feishu.cn/flow/api/trigger-webhook/${{ inputs.webhook-key }}

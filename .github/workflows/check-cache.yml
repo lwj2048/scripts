@@ -38,12 +38,6 @@ jobs:
           key: 'lwj7'
           ci_path: '/home/runner/work2/' 
 
-      - name: which 
-        run: |
-          pwd
-          ls /home/runner/work2
-          echo "--------------------------------------------"
-          ls /home/runner/work2/1234
 
       - name: Test Save Cache 8
         uses: lwj-st/cache/save@v4.2.4

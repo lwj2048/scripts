@@ -27,7 +27,7 @@ jobs:
         uses: lwj-st/cache/save@v4.2.4
         with:
           path: '1234'
-          key: 'lwj'
+          key: 'lwj2'
           ci_path: '/home/runner/work1/'  
 
       - name: 安装 SSH 服务
@@ -49,7 +49,7 @@ jobs:
         uses: lwj-st/cache/restore@v4.2.4
         with:
           path: '1234'  # 相对路径，因为会切换到 test-ci-dir
-          key: 'lwj'
+          key: 'lwj2'
           ci_path: '/home/runner/work2/' 
 
       - name: 获取访问地址

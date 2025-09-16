@@ -7,6 +7,8 @@ jobs:
   setup-server:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: 扩大空间
         uses: ./.github/actions/expand-space
         with:

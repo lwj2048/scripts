@@ -1,7 +1,12 @@
 #!/bin/bash
 
-git clone https://github.com/lwj-st/kubesphere-install.git
-cd kubesphere-install
+#需要root执行
 
+apt update
+apt install socat conntrack -y
+
+curl -sfL https://get-kk.kubesphere.io | sh -
 export KKZONE=cn
-echo yes|./kk create cluster --with-kubernetes v1.21.5  --with-kubesphere v3.3.2
+
+./kk version --show-supported-k8s
+echo yes|./kk create cluster --with-kubernetes v1.21.5

@@ -54,7 +54,7 @@ jobs:
         uses: ./.github/actions/ngrok-ssh
         with:
           platform: 'ubuntu'
-          auth_token: ${{ secrets.NGROK_AUTH_TOKEN }}
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
           port: '22'
           protocol: 'tcp'
 

@@ -37,6 +37,7 @@ if commit.committer_email == b"'"$OLD_EMAIL"'" :
 
 echo "✅ 历史提交用户名和邮箱已修改完成！"
 
-echo "提示：请执行以下命令推送到远程仓库（会重写历史）："
-echo "请重新添加远程仓库地址 git remote add origin https://github.com/xxx/xxx.git"
-echo "git push --force --tags origin 'refs/heads/*'"
+echo "提示："
+echo "有时需要重新添加远程仓库地址： git remote add origin https://github.com/xxx/xxx.git"
+echo "可遍历校验仓库文件md5值：     find . -type f ! -path \"./.git/*\" -exec md5sum {} \; "
+echo "推送到远程仓库（会重写历史）： git push --force --tags origin 'refs/heads/*'"

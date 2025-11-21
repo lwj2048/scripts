@@ -1,30 +1,57 @@
-import json
-from cryptography.fernet import Fernet
+from __future__ import annotations
 
-# 批量导入密码，你的明文密码数据，格式：{ "名称": "密码" }
-password_data = {
-    "key1": "xxxxxxxxxxx",
-    "key2": "aaaazzzzzzz",
-    "key3": "mmmmmnnnnnnn"
-}
+from typing import List
 
-# 读取加密密钥
-key_file = "key.key"
-password_file = "passwords.json"
+from storage import SecureStorage, create_entry_payload
 
-try:
-    with open(key_file, "rb") as f:
-        key = f.read()
-    cipher = Fernet(key)
-except FileNotFoundError:
-    print("错误: key.key 文件不存在，请先运行密码管理器生成密钥")
-    exit(1)
+# 批量导入（或更新）数据示例，可根据需要修改/扩展
+BULK_ENTRIES = [
+    {
+        "name": "GitHub",
+        "key": "ghp_xxxxxxxx",
+        "category": "git",
+        "notes": "个人 Access Token",
+    },
+    {
+        "name": "DockerHub",
+        "key": "docker_secret_key",
+        "category": "docker",
+        "notes": "",
+    },
+]
 
-# 加密密码数据
-encrypted_data = cipher.encrypt(json.dumps(password_data).encode())
 
-# 写入加密的 passwords.json
-with open(password_file, "wb") as f:
-    f.write(encrypted_data)
+def upsert_entries(
+    original: List[dict],
+    new_payloads: List[dict],
+) -> List[dict]:
+    """同名同分类则更新，否则追加，确保可重复执行。"""
+    mapping = {(item["name"], item.get("category", "")): item for item in original}
+    for payload in new_payloads:
+        key = (payload["name"], payload.get("category", ""))
+        if key in mapping:
+            payload["id"] = mapping[key]["id"]
+        mapping[key] = payload
+    return list(mapping.values())
 
-print("密码数据已成功加密并导入到 passwords.json")
+
+def main() -> None:
+    storage = SecureStorage()
+    current_entries = storage.load_entries()
+    prepared = [
+        create_entry_payload(
+            name=item["name"],
+            key=item["key"],
+            category=item.get("category"),
+            notes=item.get("notes"),
+        )
+        for item in BULK_ENTRIES
+    ]
+
+    merged = upsert_entries(current_entries, prepared)
+    storage.save_entries(merged)
+    print(f"已导入/更新 {len(prepared)} 条记录，共 {len(merged)} 条。")
+
+
+if __name__ == "__main__":
+    main()

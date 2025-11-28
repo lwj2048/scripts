@@ -20,10 +20,10 @@ jobs:
           lsb_release -a
           df -h
 
-      - name: 扩大空间
-        uses: ./.github/actions/expand-space
-        with:
-          platform: 'ubuntu'
+      # - name: 扩大空间
+      #   uses: ./.github/actions/expand-space
+      #   with:
+      #     platform: 'ubuntu'
 
       - name: 安装 SSH 服务
         uses: ./.github/actions/install-ssh

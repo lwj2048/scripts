@@ -1,0 +1,84 @@
+# 与 firefox-chrome.yml 类似：本机起一个带网关的 Chromium，只映射一个宿主机端口，再用 ngrok 暴露 HTTP。
+#
+# Secrets（必填）
+#   - GATEWAY_AUTH_USER / GATEWAY_AUTH_PASSWORD   网关 Basic Auth
+#   - NGROK_AUTH_TOKEN2                            与 firefox-chrome.yml 相同，ngrok authtoken
+#
+# Secrets（可选）
+#   - BROWSER_PASSWORD   需要容器内第二层密码时设置
+#
+# Variables（可选）
+#   - REMOTE_BROWSER_PORT   宿主机端口，默认 8080（与 ngrok 暴露的端口一致）
+
+name: remote-browser-auth
+
+on:
+  workflow_dispatch:
+
+jobs:
+  remote-browser-auth:
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_PORT: ${{ vars.REMOTE_BROWSER_PORT || '8080' }}
+      BROWSER_USER: ${{ vars.BROWSER_USER || 'abc' }}
+      BROWSER_TITLE: ${{ vars.BROWSER_TITLE || 'Secure Chromium' }}
+      TZ: ${{ vars.TZ || 'Asia/Shanghai' }}
+      LC_ALL: ${{ vars.LC_ALL || 'zh_CN.UTF-8' }}
+      CHROME_CLI: ${{ vars.CHROME_CLI || '--disable-dev-shm-usage' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate auth/.htpasswd
+        working-directory: remote-browser-auth
+        env:
+          GATEWAY_AUTH_USER: ${{ secrets.FIREFOX_PASSWORD }}
+          GATEWAY_AUTH_PASSWORD: ${{ secrets.FIREFOX_PASSWORD }}
+        run: |
+          if [ -z "${GATEWAY_AUTH_USER}" ] || [ -z "${GATEWAY_AUTH_PASSWORD}" ]; then
+            echo "Missing secrets: GATEWAY_AUTH_USER, GATEWAY_AUTH_PASSWORD" >&2
+            exit 1
+          fi
+          mkdir -p auth
+          docker run --rm httpd:2.4-alpine htpasswd -nbB "$GATEWAY_AUTH_USER" "$GATEWAY_AUTH_PASSWORD" > auth/.htpasswd
+
+      - name: Write .env
+        working-directory: remote-browser-auth
+        env:
+          BROWSER_PASSWORD: ${{ secrets.BROWSER_PASSWORD }}
+        run: |
+          umask 077
+          {
+            echo "PUID=1000"
+            echo "PGID=1000"
+            echo "TZ=${TZ}"
+            echo "PUBLIC_PORT=${PUBLIC_PORT}"
+            echo "LC_ALL=${LC_ALL}"
+            echo "BROWSER_USER=${BROWSER_USER}"
+            echo "BROWSER_TITLE=${BROWSER_TITLE}"
+            echo "CHROME_CLI=${CHROME_CLI}"
+            if [ -n "${BROWSER_PASSWORD}" ]; then
+              echo "BROWSER_PASSWORD=${BROWSER_PASSWORD}"
+            fi
+          } > .env
+
+      - name: Start stack (single host port → gateway)
+        working-directory: remote-browser-auth
+        run: docker compose up -d --build --force-recreate
+
+      - name: 安装 ngrok 并暴露 HTTP 端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
+          port: ${{ env.PUBLIC_PORT }}
+          protocol: 'http'
+
+      - name: 访问地址
+        run: |
+          sleep 5
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > address.txt
+          echo "🔹 公网地址（HTTP）：$(cat address.txt)"
+          echo "🔹 本机映射端口：${{ env.PUBLIC_PORT }} → 容器内 Nginx 8080 → Chromium"
+          echo "🔹 登录：Basic Auth 使用 Secrets GATEWAY_AUTH_USER / GATEWAY_AUTH_PASSWORD"
+          sleep 5h

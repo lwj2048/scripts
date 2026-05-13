@@ -1,0 +1,40 @@
+services:
+  browser:
+    image: lscr.io/linuxserver/chromium:latest
+    container_name: remote-browser
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Asia/Shanghai}
+      CUSTOM_USER: ${BROWSER_USER:-abc}
+      PASSWORD: ${BROWSER_PASSWORD}
+      TITLE: ${BROWSER_TITLE:-Secure Chromium}
+      LC_ALL: ${LC_ALL:-zh_CN.UTF-8}
+      CHROME_CLI: ${CHROME_CLI:---disable-dev-shm-usage}
+    volumes:
+      - ./config/chromium:/config
+    expose:
+      - "3000"
+      - "3001"
+    networks:
+      - browser_net
+
+  auth-gateway:
+    build:
+      context: ./auth-gateway
+    container_name: remote-browser-auth
+    restart: unless-stopped
+    depends_on:
+      - browser
+    ports:
+      - "${PUBLIC_PORT:-8080}:8080"
+    volumes:
+      - ./auth/.htpasswd:/etc/nginx/.htpasswd:ro
+    networks:
+      - browser_net
+
+networks:
+  browser_net:
+    driver: bridge

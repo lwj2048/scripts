@@ -1,0 +1,84 @@
+name: PDF To Text
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_dir:
+        description: Directory containing PDF files
+        required: false
+        default: input
+      pdf_urls:
+        description: One or more PDF URLs, one per line
+        required: false
+        default: ""
+      output_dir:
+        description: Directory where md/txt files will be written
+        required: false
+        default: output
+      pdf_glob:
+        description: Glob under input_dir used to find PDFs
+        required: false
+        default: "**/*.pdf"
+      enable_ocr:
+        description: Enable OCR fallback when text layer is unavailable
+        required: false
+        type: boolean
+        default: true
+      ocr_languages:
+        description: Tesseract language packs
+        required: false
+        default: chi_sim+eng
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-chi-sim poppler-utils
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r pdf-text-export/requirements.txt
+
+      - name: Convert PDFs
+        env:
+          PDF_PASSWORD: ${{ secrets.PDF_PASSWORD }}
+          PDF_PASSWORD_MAP_JSON: ${{ secrets.PDF_PASSWORD_MAP_JSON }}
+          PDF_URLS: ${{ inputs.pdf_urls }}
+        run: |
+          OCR_FLAG=""
+          if [ "${{ inputs.enable_ocr }}" = "true" ]; then
+            OCR_FLAG="--ocr"
+          fi
+
+          python pdf-text-export/scripts/pdf_to_text.py \
+            --input-dir "${{ inputs.input_dir }}" \
+            --output-dir "${{ inputs.output_dir }}" \
+            --glob "${{ inputs.pdf_glob }}" \
+            --ocr-languages "${{ inputs.ocr_languages }}" \
+            --pdf-urls "${PDF_URLS}" \
+            --summary-file "${{ inputs.output_dir }}/conversion-summary.md" \
+            ${OCR_FLAG}
+
+      - name: Append job summary
+        run: |
+          cat "${{ inputs.output_dir }}/conversion-summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload converted text
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-text-output
+          path: ${{ inputs.output_dir }}
+          if-no-files-found: error

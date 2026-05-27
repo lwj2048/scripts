@@ -101,13 +101,20 @@ jobs:
           set -euo pipefail
           bash -lc "${{ inputs.verify_command }}"
 
-      - name: 暴露 GMSSH Web 端口
-        uses: ./.github/actions/ngrok-ssh
-        with:
-          platform: 'ubuntu'
-          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
-          port: ${{ env.GMSSH_WEB_PORT }}
-          protocol: 'http'
+      - name: 安装 ngrok
+        run: |
+          set -euo pipefail
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt-get update
+          sudo apt-get install -y ngrok
+
+      - name: 暴露 GMSSH Web HTTPS 端口
+        run: |
+          set -euo pipefail
+          ngrok config add-authtoken "${{ secrets.NGROK_AUTH_TOKEN2 }}"
+          nohup ngrok http "https://127.0.0.1:${GMSSH_WEB_PORT}" > /tmp/gmssh-ngrok.log 2>&1 &
+          sleep 5
 
       - name: 安装 Cloudflared 隧道
         if: ${{ env.CLOUDFLARE_TUNNEL_TOKEN != '' }}
@@ -128,6 +135,11 @@ jobs:
             fi
           else
             echo "未获取到 ngrok 地址"
+          fi
+
+          if [ -f "/tmp/gmssh-ngrok.log" ]; then
+            echo "🔹 ngrok 最近日志："
+            tail -n 20 /tmp/gmssh-ngrok.log || true
           fi
 
           if [ -f "cloudflared.log" ]; then

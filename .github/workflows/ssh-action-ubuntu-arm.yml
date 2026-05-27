@@ -33,13 +33,13 @@ jobs:
           platform: 'ubuntu'
           public_key: ${{ secrets.ID_RSA_PUB }}
 
-      - name: 挂载 Google Drive (rclone)
-        uses: ./.github/actions/mount-drive
-        with:
-          platform: 'ubuntu'
-          rclone_config: ${{ secrets.RCLONE_CONF_BASE64 }}
-          mount_point: '/mnt/google-drive'
-          drive_name: 'google-drive'
+      # - name: 挂载 Google Drive (rclone)
+      #   uses: ./.github/actions/mount-drive
+      #   with:
+      #     platform: 'ubuntu'
+      #     rclone_config: ${{ secrets.RCLONE_CONF_BASE64 }}
+      #     mount_point: '/mnt/google-drive'
+      #     drive_name: 'google-drive'
 
       - name: 挂载 Koofr WebDAV (davfs2)
         uses: ./.github/actions/davfs2-mount

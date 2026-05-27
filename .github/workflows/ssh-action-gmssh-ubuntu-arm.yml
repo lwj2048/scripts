@@ -20,7 +20,8 @@ jobs:
       SSH_USERNAME: "root"
       SSH_PORT: "22"
       GMSSH_WEB_PORT: "8080"
-      NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN2 }}
+      NGROK_SSH_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      NGROK_WEB_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN2 }}
       CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +54,12 @@ jobs:
       - name: 校验安装参数
         run: |
           set -euo pipefail
-          if [ -z "${NGROK_AUTH_TOKEN:-}" ]; then
+          if [ -z "${NGROK_SSH_AUTH_TOKEN:-}" ]; then
+            echo "缺少 secret: NGROK_AUTH_TOKEN"
+            echo "需要用 ngrok 暴露 SSH 端口。"
+            exit 1
+          fi
+          if [ -z "${NGROK_WEB_AUTH_TOKEN:-}" ]; then
             echo "缺少 secret: NGROK_AUTH_TOKEN2"
             echo "需要用 ngrok 暴露 GMSSH Web 端口。"
             exit 1
@@ -118,11 +124,48 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ngrok
 
-      - name: 暴露 SSH 和 GMSSH Web
+      - name: 启动 SSH ngrok
         run: |
           set -euo pipefail
-          ngrok config add-authtoken "${{ secrets.NGROK_AUTH_TOKEN2 }}"
+          mkdir -p /tmp/ngrok-ssh
+          cat > /tmp/ngrok-ssh/ngrok.yml <<EOF
+          version: 2
+          authtoken: ${NGROK_SSH_AUTH_TOKEN}
+          EOF
+          export NGROK_CONFIG=/tmp/ngrok-ssh/ngrok.yml
           nohup ngrok tcp "${SSH_PORT}" > /tmp/gmssh-ngrok-ssh.log 2>&1 &
+          sleep 5
+
+      - name: 获取 SSH 地址
+        run: |
+          set -euo pipefail
+          if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
+            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "tcp") | .public_url' | head -n 1 > ssh_address.txt
+            if [ -s ssh_address.txt ]; then
+              echo "🔹 SSH 地址：$(cat ssh_address.txt)"
+            else
+              echo "未生成 SSH 地址"
+              exit 1
+            fi
+          else
+            echo "未获取到 SSH ngrok 地址"
+            exit 1
+          fi
+
+          if [ -f "/tmp/gmssh-ngrok-ssh.log" ]; then
+            echo "🔹 ngrok SSH 最近日志："
+            tail -n 20 /tmp/gmssh-ngrok-ssh.log || true
+          fi
+
+      - name: 启动 GMSSH Web ngrok
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ngrok-web
+          cat > /tmp/ngrok-web/ngrok.yml <<EOF
+          version: 2
+          authtoken: ${NGROK_WEB_AUTH_TOKEN}
+          EOF
+          export NGROK_CONFIG=/tmp/ngrok-web/ngrok.yml
           nohup ngrok http "https://127.0.0.1:${GMSSH_WEB_PORT}" > /tmp/gmssh-ngrok.log 2>&1 &
           sleep 5
 
@@ -139,11 +182,7 @@ jobs:
           set -euo pipefail
           sleep 5
           if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
-            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "tcp") | .public_url' | head -n 1 > ssh_address.txt
             curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "https" or .proto == "http") | .public_url' | head -n 1 > gmssh_web_url.txt
-            if [ -s ssh_address.txt ]; then
-              echo "🔹 SSH 地址：$(cat ssh_address.txt)"
-            fi
             if [ -s gmssh_web_url.txt ]; then
               echo "🔹 你的地址：$(cat gmssh_web_url.txt)"
             fi
@@ -151,10 +190,6 @@ jobs:
             echo "未获取到 ngrok 地址"
           fi
 
-          if [ -f "/tmp/gmssh-ngrok-ssh.log" ]; then
-            echo "🔹 ngrok SSH 最近日志："
-            tail -n 20 /tmp/gmssh-ngrok-ssh.log || true
-          fi
           if [ -f "/tmp/gmssh-ngrok.log" ]; then
             echo "🔹 ngrok 最近日志："
             tail -n 20 /tmp/gmssh-ngrok.log || true

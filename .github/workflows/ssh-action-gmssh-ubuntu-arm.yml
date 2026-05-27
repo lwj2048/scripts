@@ -71,14 +71,38 @@ jobs:
           echo "开始下载并安装 GMSSH..."
           curl -fsSL https://gmb-prod-gw.oss-accelerate.aliyuncs.com/package/sh/gm.sh -o gm.sh
           chmod +x gm.sh
-          echo "尝试使用端口 ${GMSSH_WEB_PORT} 安装，避免 GitHub runner 对 80 端口的误判..."
-          if printf '%s\n' "${GMSSH_WEB_PORT}" | sudo ./gm.sh install; then
-            echo "GMSSH 安装完成"
-          else
-            echo "GMSSH 安装失败。安装脚本默认会检查 80 端口，GitHub-hosted runner 上容易误判。"
-            echo "如果此处仍失败，优先改用普通云服务器或 self-hosted runner。"
+          echo "安装脚本会默认检查 80 端口；在 GitHub runner 上这里通常会误判。"
+          set +e
+          sudo ./gm.sh install
+          install_exit_code=$?
+          set -e
+          echo "安装脚本退出码: ${install_exit_code}"
+
+      - name: 改 GMSSH 端口并启动服务
+        run: |
+          set -euo pipefail
+          if ! command -v gm >/dev/null 2>&1; then
+            echo "未找到 gm 命令，说明安装没有完成到可修复阶段"
             exit 1
           fi
+
+          echo "将 GMSSH 端口改为 ${GMSSH_WEB_PORT}"
+          sudo gm setport "${GMSSH_WEB_PORT}"
+
+          echo "尝试启动 GMServer 服务"
+          sudo systemctl daemon-reload || true
+          sudo systemctl enable GMServer || true
+          sudo systemctl restart GMServer || sudo systemctl start GMServer
+          sleep 3
+
+      - name: 校验 GMSSH 服务状态
+        run: |
+          set -euo pipefail
+          sudo systemctl status GMServer --no-pager || true
+          ss -ltnp | grep ":${GMSSH_WEB_PORT} " || {
+            echo "GMSSH 没有监听在 ${GMSSH_WEB_PORT}"
+            exit 1
+          }
 
       - name: 执行可选校验命令
         if: ${{ inputs.verify_command != '' }}
@@ -94,6 +118,14 @@ jobs:
           port: '22'
           protocol: 'tcp'
 
+      - name: 暴露 GMSSH Web 端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
+          port: '8080'
+          protocol: 'http'
+
       - name: 安装 Cloudflared 隧道
         if: ${{ env.CLOUDFLARE_TUNNEL_TOKEN != '' }}
         uses: ./.github/actions/cloudflared-tunnel
@@ -107,8 +139,14 @@ jobs:
           set -euo pipefail
           sleep 5
           if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
-            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
-            echo "🔹 ngrok SSH 地址：$(cat ssh_address.txt)"
+            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "tcp") | .public_url' | head -n 1 > ssh_address.txt
+            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "https" or .proto == "http") | .public_url' | head -n 1 > gmssh_web_url.txt
+            if [ -s ssh_address.txt ]; then
+              echo "🔹 ngrok SSH 地址：$(cat ssh_address.txt)"
+            fi
+            if [ -s gmssh_web_url.txt ]; then
+              echo "🔹 GMSSH Web 地址：$(cat gmssh_web_url.txt)"
+            fi
           else
             echo "未获取到 ngrok 地址"
           fi
@@ -137,6 +175,9 @@ jobs:
             echo "   - 认证：导入对应私钥"
           else
             echo "未生成 ngrok 地址，无法输出 SSH 登录命令"
+          fi
+          if [ -f "gmssh_web_url.txt" ]; then
+            echo "🔹 GMSSH Web 访问地址：$(cat gmssh_web_url.txt)"
           fi
           echo "🔹 说明：GitHub-hosted runner 是临时机器，任务结束后环境会销毁"
 

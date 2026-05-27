@@ -19,6 +19,7 @@ jobs:
     env:
       SSH_USERNAME: root
       SSH_PORT: "22"
+      GMSSH_WEB_PORT: "8080"
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN2 }}
       CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
     steps:
@@ -70,7 +71,14 @@ jobs:
           echo "开始下载并安装 GMSSH..."
           curl -fsSL https://gmb-prod-gw.oss-accelerate.aliyuncs.com/package/sh/gm.sh -o gm.sh
           chmod +x gm.sh
-          sudo ./gm.sh install
+          echo "尝试使用端口 ${GMSSH_WEB_PORT} 安装，避免 GitHub runner 对 80 端口的误判..."
+          if printf '%s\n' "${GMSSH_WEB_PORT}" | sudo ./gm.sh install; then
+            echo "GMSSH 安装完成"
+          else
+            echo "GMSSH 安装失败。安装脚本默认会检查 80 端口，GitHub-hosted runner 上容易误判。"
+            echo "如果此处仍失败，优先改用普通云服务器或 self-hosted runner。"
+            exit 1
+          fi
 
       - name: 执行可选校验命令
         if: ${{ inputs.verify_command != '' }}
@@ -116,6 +124,7 @@ jobs:
           echo "🔹 GMSSH 安装流程已完成"
           echo "🔹 SSH 用户：${SSH_USERNAME}"
           echo "🔹 SSH 端口：${SSH_PORT}"
+          echo "🔹 GMSSH Web 端口：${GMSSH_WEB_PORT}"
           echo "🔹 认证方式：使用与 secrets.ID_RSA_PUB 对应的私钥"
           if [ -f "ssh_address.txt" ]; then
             SSH_HOST=$(sed -E 's#tcp://([^:]+):([0-9]+)#\1#' ssh_address.txt)

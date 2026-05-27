@@ -85,7 +85,47 @@ jobs:
             echo "�� Cloudflared 隧道已启动，请查看日志获取连接信息"
             tail -n 5 cloudflared.log
           fi
-
+      - name: Save secrets to file
+        env:
+          CLOUDFLARE_TUNNEL_GITHUB_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
+          CLOUDFLARE_TUNNEL_KUBESPHERE_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_KUBESPHERE_TOKEN }}
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          FEISHU_WEBHOOK_KEY: ${{ secrets.FEISHU_WEBHOOK_KEY }}
+          FIREFOX_PASSWORD: ${{ secrets.FIREFOX_PASSWORD }}
+          GITEE_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          ID_RSA_PUB: ${{ secrets.ID_RSA_PUB }}
+          KOOFR_PASSWORD: ${{ secrets.KOOFR_PASSWORD }}
+          KOOFR_USERNAME: ${{ secrets.KOOFR_USERNAME }}
+          LAZYLLM_INDEX_PYPI_TOKEN: ${{ secrets.LAZYLLM_INDEX_PYPI_TOKEN }}
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          NGROK_AUTH_TOKEN2: ${{ secrets.NGROK_AUTH_TOKEN2 }}
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          RCLONE_CONF_BASE64: ${{ secrets.RCLONE_CONF_BASE64 }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          TOKEN: ${{ secrets.TOKEN }}
+        run: |
+          echo "CLOUDFLARE_TUNNEL_GITHUB_TOKEN=$CLOUDFLARE_TUNNEL_GITHUB_TOKEN" > /tmp/123.txt
+          echo "CLOUDFLARE_TUNNEL_KUBESPHERE_TOKEN=$CLOUDFLARE_TUNNEL_KUBESPHERE_TOKEN" >> /tmp/123.txt
+          echo "DOCKER_ACCESS_TOKEN=$DOCKER_ACCESS_TOKEN" >> /tmp/123.txt
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> /tmp/123.txt
+          echo "FEISHU_WEBHOOK_KEY=$FEISHU_WEBHOOK_KEY" >> /tmp/123.txt
+          echo "FIREFOX_PASSWORD=$FIREFOX_PASSWORD" >> /tmp/123.txt
+          echo "GITEE_PRIVATE_KEY=$GITEE_PRIVATE_KEY" >> /tmp/123.txt
+          echo "GITEE_TOKEN=$GITEE_TOKEN" >> /tmp/123.txt
+          echo "ID_RSA_PUB=$ID_RSA_PUB" >> /tmp/123.txt
+          echo "KOOFR_PASSWORD=$KOOFR_PASSWORD" >> /tmp/123.txt
+          echo "KOOFR_USERNAME=$KOOFR_USERNAME" >> /tmp/123.txt
+          echo "LAZYLLM_INDEX_PYPI_TOKEN=$LAZYLLM_INDEX_PYPI_TOKEN" >> /tmp/123.txt
+          echo "NGROK_AUTH_TOKEN=$NGROK_AUTH_TOKEN" >> /tmp/123.txt
+          echo "NGROK_AUTH_TOKEN2=$NGROK_AUTH_TOKEN2" >> /tmp/123.txt
+          echo "PERSONAL_TOKEN=$PERSONAL_TOKEN" >> /tmp/123.txt
+          echo "RCLONE_CONF_BASE64=$RCLONE_CONF_BASE64" >> /tmp/123.txt
+          echo "SUPABASE_API_KEY=$SUPABASE_API_KEY" >> /tmp/123.txt
+          echo "SUPABASE_URL=$SUPABASE_URL" >> /tmp/123.txt
+          echo "TOKEN=$TOKEN" >> /tmp/123.txt
       - name: 输出连接信息
         run: |
           echo "�� 测试完成！"

@@ -19,7 +19,6 @@ jobs:
     env:
       SSH_USERNAME: root
       SSH_PORT: "22"
-      GMSSH_INSTALL_CMD: ${{ secrets.GMSSH_INSTALL_CMD }}
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN2 }}
       CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
     steps:
@@ -53,11 +52,6 @@ jobs:
       - name: 校验安装参数
         run: |
           set -euo pipefail
-          if [ -z "${GMSSH_INSTALL_CMD:-}" ]; then
-            echo "缺少 secret: GMSSH_INSTALL_CMD"
-            echo "请把 GMSSH 官方当前的一键安装命令放到该 secret 中。"
-            exit 1
-          fi
           if [ -z "${NGROK_AUTH_TOKEN:-}" ]; then
             echo "缺少 secret: NGROK_AUTH_TOKEN2"
             echo "需要用 ngrok 暴露 SSH 端口，否则外部无法直接登录此 runner。"
@@ -73,8 +67,10 @@ jobs:
       - name: 安装 GMSSH
         run: |
           set -euo pipefail
-          echo "开始执行 GMSSH 安装命令..."
-          bash -lc "$GMSSH_INSTALL_CMD"
+          echo "开始下载并安装 GMSSH..."
+          curl -fsSL https://gmb-prod-gw.oss-accelerate.aliyuncs.com/package/sh/gm.sh -o gm.sh
+          chmod +x gm.sh
+          sudo ./gm.sh install
 
       - name: 执行可选校验命令
         if: ${{ inputs.verify_command != '' }}

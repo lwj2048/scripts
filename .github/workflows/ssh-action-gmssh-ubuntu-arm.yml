@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 360
     env:
-      SSH_USERNAME: root
-      SSH_PORT: "22"
       GMSSH_WEB_PORT: "8080"
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN2 }}
       CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_GITHUB_TOKEN }}
@@ -43,19 +41,12 @@ jobs:
         with:
           platform: 'ubuntu'
 
-      - name: 安装 SSH 服务
-        uses: ./.github/actions/install-ssh
-        with:
-          platform: 'ubuntu'
-          public_key: ${{ secrets.ID_RSA_PUB }}
-          username: 'root'
-
       - name: 校验安装参数
         run: |
           set -euo pipefail
           if [ -z "${NGROK_AUTH_TOKEN:-}" ]; then
             echo "缺少 secret: NGROK_AUTH_TOKEN2"
-            echo "需要用 ngrok 暴露 SSH 端口，否则外部无法直接登录此 runner。"
+            echo "需要用 ngrok 暴露 GMSSH Web 端口。"
             exit 1
           fi
 
@@ -110,20 +101,12 @@ jobs:
           set -euo pipefail
           bash -lc "${{ inputs.verify_command }}"
 
-      - name: 安装 ngrok 并暴露 SSH 端口
-        uses: ./.github/actions/ngrok-ssh
-        with:
-          platform: 'ubuntu'
-          auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
-          port: '22'
-          protocol: 'tcp'
-
       - name: 暴露 GMSSH Web 端口
         uses: ./.github/actions/ngrok-ssh
         with:
           platform: 'ubuntu'
           auth_token: ${{ secrets.NGROK_AUTH_TOKEN2 }}
-          port: '8080'
+          port: ${{ env.GMSSH_WEB_PORT }}
           protocol: 'http'
 
       - name: 安装 Cloudflared 隧道
@@ -139,13 +122,9 @@ jobs:
           set -euo pipefail
           sleep 5
           if curl -s http://127.0.0.1:4040/api/tunnels > /dev/null 2>&1; then
-            curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "tcp") | .public_url' | head -n 1 > ssh_address.txt
             curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "https" or .proto == "http") | .public_url' | head -n 1 > gmssh_web_url.txt
-            if [ -s ssh_address.txt ]; then
-              echo "🔹 ngrok SSH 地址：$(cat ssh_address.txt)"
-            fi
             if [ -s gmssh_web_url.txt ]; then
-              echo "🔹 GMSSH Web 地址：$(cat gmssh_web_url.txt)"
+              echo "🔹 你的地址：$(cat gmssh_web_url.txt)"
             fi
           else
             echo "未获取到 ngrok 地址"
@@ -160,24 +139,12 @@ jobs:
         run: |
           set -euo pipefail
           echo "🔹 GMSSH 安装流程已完成"
-          echo "🔹 SSH 用户：${SSH_USERNAME}"
-          echo "🔹 SSH 端口：${SSH_PORT}"
           echo "🔹 GMSSH Web 端口：${GMSSH_WEB_PORT}"
-          echo "🔹 认证方式：使用与 secrets.ID_RSA_PUB 对应的私钥"
-          if [ -f "ssh_address.txt" ]; then
-            SSH_HOST=$(sed -E 's#tcp://([^:]+):([0-9]+)#\1#' ssh_address.txt)
-            SSH_REMOTE_PORT=$(sed -E 's#tcp://([^:]+):([0-9]+)#\2#' ssh_address.txt)
-            echo "🔹 SSH 登录命令：ssh ${SSH_USERNAME}@${SSH_HOST} -p ${SSH_REMOTE_PORT}"
-            echo "🔹 在 GMSSH 中新增服务器时填写："
-            echo "   - 主机：${SSH_HOST}"
-            echo "   - 端口：${SSH_REMOTE_PORT}"
-            echo "   - 用户名：${SSH_USERNAME}"
-            echo "   - 认证：导入对应私钥"
-          else
-            echo "未生成 ngrok 地址，无法输出 SSH 登录命令"
-          fi
           if [ -f "gmssh_web_url.txt" ]; then
             echo "🔹 GMSSH Web 访问地址：$(cat gmssh_web_url.txt)"
+            echo "🔹 直接用本地浏览器打开上面的 https 地址"
+          else
+            echo "未生成 GMSSH Web 地址"
           fi
           echo "🔹 说明：GitHub-hosted runner 是临时机器，任务结束后环境会销毁"
 

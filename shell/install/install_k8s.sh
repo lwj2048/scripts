@@ -125,11 +125,15 @@ if command -v containerd >/dev/null 2>&1; then
   systemctl restart containerd 2>/dev/null || true
 fi
 
-CREATE_ARGS=(create cluster --with-kubernetes "${K8S_VERSION}" -y)
+CREATE_ARGS=(create cluster --with-kubernetes "${K8S_VERSION}")
 if ./kk create cluster --help | grep -q -- "--container-manager"; then
   CREATE_ARGS+=(--container-manager containerd)
 else
   CREATE_ARGS+=(--set cri.container_manager=containerd --set cri.cgroup_driver=systemd)
 fi
 
-./kk "${CREATE_ARGS[@]}"
+if ./kk create cluster --help | grep -q -- "--yes"; then
+  ./kk "${CREATE_ARGS[@]}" --yes
+else
+  printf 'yes\n' | ./kk "${CREATE_ARGS[@]}"
+fi

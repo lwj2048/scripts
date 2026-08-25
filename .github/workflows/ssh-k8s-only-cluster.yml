@@ -1,0 +1,99 @@
+name: SSH k8s only cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      architecture:
+        description: 'Runner architecture'
+        required: true
+        default: 'amd64'
+        type: choice
+        options:
+          - amd64
+          - arm64
+      k8s_version:
+        description: 'Kubernetes version'
+        required: true
+        default: 'v1.31.11'
+        type: string
+      purge_docker:
+        description: 'Purge Docker before installing Kubernetes'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  start-k8s-cluster:
+    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.9'
+
+      - name: 检查系统信息
+        run: |
+          uname -a
+          lsb_release -a
+          df -h
+          lscpu | grep Architecture
+
+      - name: 扩大空间
+        uses: ./.github/actions/expand-space
+        with:
+          platform: 'ubuntu'
+
+      - name: 安装 SSH 服务
+        uses: ./.github/actions/install-ssh
+        with:
+          platform: 'ubuntu'
+          public_key: ${{ secrets.ID_RSA_PUB }}
+
+      - name: 挂载 Koofr WebDAV (davfs2)
+        uses: ./.github/actions/davfs2-mount
+        with:
+          platform: 'ubuntu'
+          webdav_url: 'https://app.koofr.net/dav/Koofr/'
+          username: ${{ secrets.KOOFR_USERNAME }}
+          password: ${{ secrets.KOOFR_PASSWORD }}
+          mount_point: '/mnt/share'
+
+      - name: 安装 ngrok 并暴露端口
+        uses: ./.github/actions/ngrok-ssh
+        with:
+          platform: 'ubuntu'
+          auth_token: ${{ inputs.architecture == 'arm64' && secrets.NGROK_AUTH_TOKEN2 || secrets.NGROK_AUTH_TOKEN }}
+          port: '22'
+          protocol: 'tcp'
+
+      - name: 安装 Kubernetes
+        run: |
+          PURGE_DOCKER_ARGS=""
+          if [ "${{ inputs.purge_docker }}" = "true" ]; then
+            PURGE_DOCKER_ARGS="--purge-docker"
+          fi
+
+          sudo bash ./shell/install/install_k8s.sh \
+            --arch "${{ inputs.architecture }}" \
+            --k8s-version "${{ inputs.k8s_version }}" \
+            ${PURGE_DOCKER_ARGS}
+
+      - name: 验证 Kubernetes
+        run: |
+          sudo kubectl get nodes -o wide
+          sudo kubectl get pods -A
+
+      - name: 获取 SSH 访问地址
+        run: |
+          sleep 5
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
+          echo "SSH 地址：" "$(cat ssh_address.txt)"
+
+      - name: 输出 SSH 连接方式
+        run: |
+          SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+          SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+          echo "ssh root@${SSH_HOST} -p ${SSH_PORT}"
+          sleep 5h

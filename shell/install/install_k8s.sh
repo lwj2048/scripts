@@ -79,6 +79,17 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y curl socat conntrack ipset ipvsadm
 
+DOWNLOAD_ARCH="${TARGET_ARCH:-${HOST_ARCH}}"
+KUBELET_URL="https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/${DOWNLOAD_ARCH}/kubelet"
+if ! curl -fsI "${KUBELET_URL}" >/dev/null 2>&1; then
+  cat >&2 <<EOF
+Kubernetes binary not found: ${KUBELET_URL}
+Please choose an existing Kubernetes patch version for ${DOWNLOAD_ARCH}.
+For Kubernetes 1.31, v1.31.11 is the default for this script.
+EOF
+  exit 1
+fi
+
 export KKZONE="${KKZONE_VALUE}"
 curl -sfL https://get-kk.kubesphere.io | sh -
 

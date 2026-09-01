@@ -16,6 +16,14 @@ on:
         required: true
         default: 'v1.31.11'
         type: string
+      kkzone:
+        description: 'KubeKey download zone'
+        required: true
+        default: 'global'
+        type: choice
+        options:
+          - global
+          - cn
       purge_docker:
         description: 'Purge Docker before installing Kubernetes'
         required: true
@@ -78,6 +86,7 @@ jobs:
           sudo bash ./shell/install/install_k8s.sh \
             --arch "${{ inputs.architecture }}" \
             --k8s-version "${{ inputs.k8s_version }}" \
+            --kkzone "${{ inputs.kkzone }}" \
             ${PURGE_DOCKER_ARGS}
 
       - name: 验证 Kubernetes

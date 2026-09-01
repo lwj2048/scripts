@@ -5,12 +5,12 @@ set -euo pipefail
 
 K8S_VERSION="v1.31.11"
 TARGET_ARCH=""
-KKZONE_VALUE="${KKZONE:-cn}"
+KKZONE_VALUE="${KKZONE:-global}"
 PURGE_DOCKER="false"
 
 usage() {
   cat <<EOF
-Usage: $0 [--k8s-version v1.31.11] [--arch amd64|arm64] [--kkzone cn|global] [--purge-docker]
+Usage: $0 [--k8s-version v1.31.11] [--arch amd64|arm64] [--kkzone global|cn] [--purge-docker]
 EOF
 }
 
@@ -80,15 +80,17 @@ apt-get update
 apt-get install -y curl socat conntrack ipset ipvsadm
 
 DOWNLOAD_ARCH="${TARGET_ARCH:-${HOST_ARCH}}"
-KUBELET_URL="https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/${DOWNLOAD_ARCH}/kubelet"
-if ! curl -fsI "${KUBELET_URL}" >/dev/null 2>&1; then
-  cat >&2 <<EOF
-Kubernetes binary not found: ${KUBELET_URL}
+for binary in kubeadm kubectl kubelet; do
+  K8S_BINARY_URL="https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/${DOWNLOAD_ARCH}/${binary}"
+  if ! curl -fsI "${K8S_BINARY_URL}" >/dev/null 2>&1; then
+    cat >&2 <<EOF
+Kubernetes binary not found: ${K8S_BINARY_URL}
 Please choose an existing Kubernetes patch version for ${DOWNLOAD_ARCH}.
 For Kubernetes 1.31, v1.31.11 is the default for this script.
 EOF
-  exit 1
-fi
+    exit 1
+  fi
+done
 
 export KKZONE="${KKZONE_VALUE}"
 curl -sfL https://get-kk.kubesphere.io | sh -
@@ -144,7 +146,48 @@ else
 fi
 
 if ./kk create cluster --help | grep -q -- "--yes"; then
-  ./kk "${CREATE_ARGS[@]}" --yes
+  CREATE_ARGS+=(--yes)
+fi
+
+run_create_cluster() {
+  if printf '%s\n' "${CREATE_ARGS[@]}" | grep -qx -- "--yes"; then
+    ./kk "${CREATE_ARGS[@]}"
+  else
+    printf 'yes\n' | ./kk "${CREATE_ARGS[@]}"
+  fi
+}
+
+fetch_missing_etcd_artifacts() {
+  local log_file="$1"
+  local fetched=0
+  local missing_path
+
+  while IFS= read -r missing_path; do
+    local file_name version url
+
+    file_name="$(basename "${missing_path}")"
+    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/etcd/(v[0-9]+\.[0-9]+\.[0-9]+)/.*#\1#')"
+    url="https://github.com/etcd-io/etcd/releases/download/${version}/${file_name}"
+
+    mkdir -p "$(dirname "${missing_path}")"
+    echo "Downloading missing etcd artifact: ${url}"
+    curl -fL --retry 3 --retry-delay 2 -o "${missing_path}" "${url}"
+    fetched=1
+  done < <(
+    grep -Eo '/[^[:space:]]+/etcd/v[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/etcd-v[0-9]+\.[0-9]+\.[0-9]+-linux-(amd64|arm64)\.tar\.gz' "${log_file}" | sort -u
+  )
+
+  [[ "${fetched}" == "1" ]]
+}
+
+CREATE_LOG="$(mktemp)"
+if run_create_cluster 2>&1 | tee "${CREATE_LOG}"; then
+  exit 0
+fi
+
+if fetch_missing_etcd_artifacts "${CREATE_LOG}"; then
+  echo "Retrying KubeKey cluster creation after downloading missing etcd artifacts."
+  run_create_cluster
 else
-  printf 'yes\n' | ./kk "${CREATE_ARGS[@]}"
+  exit 1
 fi

@@ -157,6 +157,59 @@ run_create_cluster() {
   fi
 }
 
+download_kubekey_artifact() {
+  local target_path="$1"
+  local url="$2"
+  local executable="${3:-false}"
+
+  if [[ -f "${target_path}" ]]; then
+    return 0
+  fi
+
+  mkdir -p "$(dirname "${target_path}")"
+  echo "Preloading KubeKey artifact: ${url}"
+  curl -fL --retry 3 --retry-delay 2 -o "${target_path}" "${url}"
+
+  if [[ "${executable}" == "true" ]]; then
+    chmod +x "${target_path}"
+  fi
+}
+
+preload_common_kubekey_artifacts() {
+  local arch="$1"
+  local kube_version="$2"
+  local kube_version_number="${kube_version#v}"
+  local cache_root="${PWD}/kubekey/kubekey"
+  local binary
+
+  download_kubekey_artifact \
+    "${cache_root}/etcd/v3.5.24/${arch}/etcd-v3.5.24-linux-${arch}.tar.gz" \
+    "https://github.com/etcd-io/etcd/releases/download/v3.5.24/etcd-v3.5.24-linux-${arch}.tar.gz"
+  download_kubekey_artifact \
+    "${cache_root}/crictl/v1.31.0/${arch}/crictl-v1.31.0-linux-${arch}.tar.gz" \
+    "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.31.0/crictl-v1.31.0-linux-${arch}.tar.gz"
+  download_kubekey_artifact \
+    "${cache_root}/runc/v1.1.12/${arch}/runc.${arch}" \
+    "https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.${arch}" \
+    true
+  download_kubekey_artifact \
+    "${cache_root}/containerd/v1.7.13/${arch}/containerd-1.7.13-linux-${arch}.tar.gz" \
+    "https://github.com/containerd/containerd/releases/download/v1.7.13/containerd-1.7.13-linux-${arch}.tar.gz"
+  download_kubekey_artifact \
+    "${cache_root}/helm/v3.13.3/${arch}/helm-v3.13.3-linux-${arch}.tar.gz" \
+    "https://get.helm.sh/helm-v3.13.3-linux-${arch}.tar.gz"
+  download_kubekey_artifact \
+    "${cache_root}/cni/plugins/v1.9.1/${arch}/cni-plugins-linux-${arch}-v1.9.1.tgz" \
+    "https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-${arch}-v1.9.1.tgz"
+
+  for binary in kubeadm kubectl kubelet; do
+    download_kubekey_artifact \
+      "${cache_root}/kube/v${kube_version_number}/${arch}/${binary}" \
+      "https://dl.k8s.io/release/v${kube_version_number}/bin/linux/${arch}/${binary}" \
+      true
+  done
+}
+
 fetch_missing_kubekey_artifacts() {
   local log_file="$1"
   local fetched=0
@@ -217,6 +270,8 @@ fetch_missing_kubekey_artifacts() {
 
   [[ "${fetched}" == "1" ]]
 }
+
+preload_common_kubekey_artifacts "${DOWNLOAD_ARCH}" "${K8S_VERSION}"
 
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   CREATE_LOG="$(mktemp)"

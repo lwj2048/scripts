@@ -201,6 +201,10 @@ preload_common_kubekey_artifacts() {
   download_kubekey_artifact \
     "${cache_root}/cni/plugins/v1.9.1/${arch}/cni-plugins-linux-${arch}-v1.9.1.tgz" \
     "https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-${arch}-v1.9.1.tgz"
+  download_kubekey_artifact \
+    "${cache_root}/cni/calico/v3.30.5/${arch}/calicoctl-linux-${arch}" \
+    "https://github.com/projectcalico/calico/releases/download/v3.30.5/calicoctl-linux-${arch}" \
+    true
 
   for binary in kubeadm kubectl kubelet; do
     download_kubekey_artifact \
@@ -221,9 +225,9 @@ fetch_missing_kubekey_artifacts() {
     missing_path="${missing_path%:}"
     file_name="$(basename "${missing_path}")"
     component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/([^/]+)/.*#\1#')"
-    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/)?(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\2#')"
+    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/|calico/)?(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\2#')"
     version_number="${version#v}"
-    artifact_arch="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/)?v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/.*#\2#')"
+    artifact_arch="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/|calico/)?v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/.*#\2#')"
 
     case "${component}" in
       etcd)
@@ -239,7 +243,11 @@ fetch_missing_kubekey_artifacts() {
         url="https://github.com/containerd/containerd/releases/download/v${version_number}/${file_name}"
         ;;
       cni)
-        url="https://github.com/containernetworking/plugins/releases/download/v${version_number}/${file_name}"
+        if [[ "${file_name}" == calicoctl-* ]]; then
+          url="https://github.com/projectcalico/calico/releases/download/v${version_number}/${file_name}"
+        else
+          url="https://github.com/containernetworking/plugins/releases/download/v${version_number}/${file_name}"
+        fi
         ;;
       helm)
         url="https://get.helm.sh/${file_name}"
@@ -256,7 +264,7 @@ fetch_missing_kubekey_artifacts() {
     mkdir -p "$(dirname "${missing_path}")"
     echo "Downloading missing KubeKey artifact: ${url}"
     curl -fL --retry 3 --retry-delay 2 -o "${missing_path}" "${url}"
-    if [[ "${component}" == "kube" || "${component}" == "runc" ]]; then
+    if [[ "${component}" == "kube" || "${component}" == "runc" || "${file_name}" == calicoctl-* ]]; then
       chmod +x "${missing_path}"
     fi
     fetched=1
@@ -264,6 +272,7 @@ fetch_missing_kubekey_artifacts() {
     {
       grep -Eo '/[^[:space:]":]+/kubekey/(etcd|crictl|containerd|cni|helm|kube)/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
       grep -Eo '/[^[:space:]":]+/kubekey/cni/plugins/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
+      grep -Eo '/[^[:space:]":]+/kubekey/cni/calico/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
       grep -Eo '/[^[:space:]]+/kubekey/runc/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/runc\.(amd64|arm64)' "${log_file}" || true
     } | sort -u
   )

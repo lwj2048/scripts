@@ -163,13 +163,14 @@ fetch_missing_kubekey_artifacts() {
   local missing_path
 
   while IFS= read -r missing_path; do
-    local file_name version component version_number url
+    local file_name version component version_number artifact_arch url
 
     missing_path="${missing_path%:}"
     file_name="$(basename "${missing_path}")"
     component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/([^/]+)/.*#\1#')"
     version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\1#')"
     version_number="${version#v}"
+    artifact_arch="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/.*#\1#')"
 
     case "${component}" in
       etcd)
@@ -190,6 +191,9 @@ fetch_missing_kubekey_artifacts() {
       helm)
         url="https://get.helm.sh/${file_name}"
         ;;
+      kube)
+        url="https://dl.k8s.io/release/v${version_number}/bin/linux/${artifact_arch}/${file_name}"
+        ;;
       *)
         echo "Unsupported missing KubeKey artifact: ${missing_path}" >&2
         return 1
@@ -199,10 +203,13 @@ fetch_missing_kubekey_artifacts() {
     mkdir -p "$(dirname "${missing_path}")"
     echo "Downloading missing KubeKey artifact: ${url}"
     curl -fL --retry 3 --retry-delay 2 -o "${missing_path}" "${url}"
+    if [[ "${component}" == "kube" || "${component}" == "runc" ]]; then
+      chmod +x "${missing_path}"
+    fi
     fetched=1
   done < <(
     {
-      grep -Eo '/[^[:space:]":]+/kubekey/(etcd|crictl|containerd|cni|helm)/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
+      grep -Eo '/[^[:space:]":]+/kubekey/(etcd|crictl|containerd|cni|helm|kube)/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
       grep -Eo '/[^[:space:]]+/kubekey/runc/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/runc\.(amd64|arm64)' "${log_file}" || true
     } | sort -u
   )

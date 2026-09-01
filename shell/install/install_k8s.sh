@@ -157,37 +157,55 @@ run_create_cluster() {
   fi
 }
 
-fetch_missing_etcd_artifacts() {
+fetch_missing_kubekey_artifacts() {
   local log_file="$1"
   local fetched=0
   local missing_path
 
   while IFS= read -r missing_path; do
-    local file_name version url
+    local file_name version component url
 
     file_name="$(basename "${missing_path}")"
-    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/etcd/(v[0-9]+\.[0-9]+\.[0-9]+)/.*#\1#')"
-    url="https://github.com/etcd-io/etcd/releases/download/${version}/${file_name}"
+    component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/(etcd|crictl)/.*#\1#')"
+    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/(etcd|crictl)/(v[0-9]+\.[0-9]+\.[0-9]+)/.*#\2#')"
+
+    case "${component}" in
+      etcd)
+        url="https://github.com/etcd-io/etcd/releases/download/${version}/${file_name}"
+        ;;
+      crictl)
+        url="https://github.com/kubernetes-sigs/cri-tools/releases/download/${version}/${file_name}"
+        ;;
+      *)
+        echo "Unsupported missing KubeKey artifact: ${missing_path}" >&2
+        return 1
+        ;;
+    esac
 
     mkdir -p "$(dirname "${missing_path}")"
-    echo "Downloading missing etcd artifact: ${url}"
+    echo "Downloading missing KubeKey artifact: ${url}"
     curl -fL --retry 3 --retry-delay 2 -o "${missing_path}" "${url}"
     fetched=1
   done < <(
-    grep -Eo '/[^[:space:]]+/etcd/v[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/etcd-v[0-9]+\.[0-9]+\.[0-9]+-linux-(amd64|arm64)\.tar\.gz' "${log_file}" | sort -u
+    grep -Eo '/[^[:space:]]+/kubekey/(etcd|crictl)/v[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/(etcd|crictl)-v[0-9]+\.[0-9]+\.[0-9]+-linux-(amd64|arm64)\.tar\.gz' "${log_file}" | sort -u
   )
 
   [[ "${fetched}" == "1" ]]
 }
 
-CREATE_LOG="$(mktemp)"
-if run_create_cluster 2>&1 | tee "${CREATE_LOG}"; then
-  exit 0
-fi
+for attempt in 1 2 3 4 5; do
+  CREATE_LOG="$(mktemp)"
+  if run_create_cluster 2>&1 | tee "${CREATE_LOG}"; then
+    exit 0
+  fi
 
-if fetch_missing_etcd_artifacts "${CREATE_LOG}"; then
-  echo "Retrying KubeKey cluster creation after downloading missing etcd artifacts."
-  run_create_cluster
-else
+  if fetch_missing_kubekey_artifacts "${CREATE_LOG}"; then
+    echo "Retrying KubeKey cluster creation after downloading missing artifacts. attempt=${attempt}"
+    continue
+  fi
+
   exit 1
-fi
+done
+
+echo "KubeKey cluster creation still failed after retrying missing artifacts." >&2
+exit 1

@@ -210,7 +210,7 @@ fetch_missing_kubekey_artifacts() {
   [[ "${fetched}" == "1" ]]
 }
 
-for attempt in 1 2 3 4 5; do
+for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   CREATE_LOG="$(mktemp)"
   if run_create_cluster 2>&1 | tee "${CREATE_LOG}"; then
     exit 0

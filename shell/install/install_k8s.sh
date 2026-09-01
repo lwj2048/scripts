@@ -163,18 +163,31 @@ fetch_missing_kubekey_artifacts() {
   local missing_path
 
   while IFS= read -r missing_path; do
-    local file_name version component url
+    local file_name version component version_number url
 
     file_name="$(basename "${missing_path}")"
-    component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/(etcd|crictl)/.*#\1#')"
-    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/(etcd|crictl)/(v[0-9]+\.[0-9]+\.[0-9]+)/.*#\2#')"
+    component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/([^/]+)/.*#\1#')"
+    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\1#')"
+    version_number="${version#v}"
 
     case "${component}" in
       etcd)
-        url="https://github.com/etcd-io/etcd/releases/download/${version}/${file_name}"
+        url="https://github.com/etcd-io/etcd/releases/download/v${version_number}/${file_name}"
         ;;
       crictl)
-        url="https://github.com/kubernetes-sigs/cri-tools/releases/download/${version}/${file_name}"
+        url="https://github.com/kubernetes-sigs/cri-tools/releases/download/v${version_number}/${file_name}"
+        ;;
+      runc)
+        url="https://github.com/opencontainers/runc/releases/download/v${version_number}/${file_name}"
+        ;;
+      containerd)
+        url="https://github.com/containerd/containerd/releases/download/v${version_number}/${file_name}"
+        ;;
+      cni)
+        url="https://github.com/containernetworking/plugins/releases/download/v${version_number}/${file_name}"
+        ;;
+      helm)
+        url="https://get.helm.sh/${file_name}"
         ;;
       *)
         echo "Unsupported missing KubeKey artifact: ${missing_path}" >&2
@@ -187,7 +200,10 @@ fetch_missing_kubekey_artifacts() {
     curl -fL --retry 3 --retry-delay 2 -o "${missing_path}" "${url}"
     fetched=1
   done < <(
-    grep -Eo '/[^[:space:]]+/kubekey/(etcd|crictl)/v[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/(etcd|crictl)-v[0-9]+\.[0-9]+\.[0-9]+-linux-(amd64|arm64)\.tar\.gz' "${log_file}" | sort -u
+    {
+      grep -Eo '/[^[:space:]]+/kubekey/(etcd|crictl|containerd|cni|helm)/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]"]+' "${log_file}" || true
+      grep -Eo '/[^[:space:]]+/kubekey/runc/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/runc\.(amd64|arm64)' "${log_file}" || true
+    } | sort -u
   )
 
   [[ "${fetched}" == "1" ]]

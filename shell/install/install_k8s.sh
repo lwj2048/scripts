@@ -168,9 +168,9 @@ fetch_missing_kubekey_artifacts() {
     missing_path="${missing_path%:}"
     file_name="$(basename "${missing_path}")"
     component="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/([^/]+)/.*#\1#')"
-    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\1#')"
+    version="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/)?(v?[0-9]+\.[0-9]+\.[0-9]+)/.*#\2#')"
     version_number="${version#v}"
-    artifact_arch="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/.*#\1#')"
+    artifact_arch="$(printf '%s\n' "${missing_path}" | sed -E 's#.*/kubekey/[^/]+/(plugins/)?v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/.*#\2#')"
 
     case "${component}" in
       etcd)
@@ -210,6 +210,7 @@ fetch_missing_kubekey_artifacts() {
   done < <(
     {
       grep -Eo '/[^[:space:]":]+/kubekey/(etcd|crictl|containerd|cni|helm|kube)/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
+      grep -Eo '/[^[:space:]":]+/kubekey/cni/plugins/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/[^[:space:]":]+' "${log_file}" || true
       grep -Eo '/[^[:space:]]+/kubekey/runc/v?[0-9]+\.[0-9]+\.[0-9]+/(amd64|arm64)/runc\.(amd64|arm64)' "${log_file}" || true
     } | sort -u
   )

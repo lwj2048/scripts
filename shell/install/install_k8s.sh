@@ -157,6 +157,42 @@ run_create_cluster() {
   fi
 }
 
+ingress_nginx_version_for_k8s() {
+  local kube_version="$1"
+  local minor
+
+  minor="$(printf '%s\n' "${kube_version}" | sed -E 's/^v?1\.([0-9]+)\..*/\1/')"
+  # Based on the official ingress-nginx supported versions table.
+  case "${minor}" in
+    23) printf '%s\n' "v1.6.4" ;;
+    24) printf '%s\n' "v1.8.4" ;;
+    25) printf '%s\n' "v1.9.6" ;;
+    26|27) printf '%s\n' "v1.11.8" ;;
+    28) printf '%s\n' "v1.12.1" ;;
+    29) printf '%s\n' "v1.13.9" ;;
+    30) printf '%s\n' "v1.14.5" ;;
+    31|32|33|34) printf '%s\n' "v1.15.1" ;;
+    *)
+      echo "No ingress-nginx version mapping for Kubernetes ${kube_version}." >&2
+      return 1
+      ;;
+  esac
+}
+
+install_ingress_nginx() {
+  local kube_version="$1"
+  local ingress_version manifest_url
+
+  ingress_version="$(ingress_nginx_version_for_k8s "${kube_version}")"
+  manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-${ingress_version}/deploy/static/provider/cloud/deploy.yaml"
+
+  echo "Installing ingress-nginx ${ingress_version} for Kubernetes ${kube_version}"
+  kubectl apply -f "${manifest_url}"
+  kubectl -n ingress-nginx rollout status deployment/ingress-nginx-controller --timeout=300s
+  kubectl get ingressclass
+  kubectl -n ingress-nginx get pods -o wide
+}
+
 download_kubekey_artifact() {
   local target_path="$1"
   local url="$2"
@@ -285,6 +321,7 @@ preload_common_kubekey_artifacts "${DOWNLOAD_ARCH}" "${K8S_VERSION}"
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   CREATE_LOG="$(mktemp)"
   if run_create_cluster 2>&1 | tee "${CREATE_LOG}"; then
+    install_ingress_nginx "${K8S_VERSION}"
     exit 0
   fi
 

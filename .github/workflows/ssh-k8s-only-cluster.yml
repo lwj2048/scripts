@@ -285,6 +285,8 @@ jobs:
         run: |
           sudo kubectl get nodes -o wide
           sudo kubectl get pods -A
+          sudo kubectl get ingressclass
+          sudo kubectl -n ingress-nginx get pods -o wide
 
       - name: 获取 SSH 访问地址
         run: |

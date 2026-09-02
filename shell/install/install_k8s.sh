@@ -188,9 +188,11 @@ install_ingress_nginx() {
 
   echo "Installing ingress-nginx ${ingress_version} for Kubernetes ${kube_version}"
   kubectl apply -f "${manifest_url}"
+  kubectl -n ingress-nginx patch service ingress-nginx-controller -p '{"spec":{"type":"NodePort"}}'
   kubectl -n ingress-nginx rollout status deployment/ingress-nginx-controller --timeout=300s
   kubectl get ingressclass
   kubectl -n ingress-nginx get pods -o wide
+  kubectl -n ingress-nginx get service ingress-nginx-controller -o wide
 }
 
 download_kubekey_artifact() {

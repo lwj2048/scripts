@@ -26,14 +26,50 @@ runs:
     - name: 安装 davfs2 (Ubuntu)
       if: ${{ inputs.platform == 'ubuntu' }}
       shell: bash
+      env:
+        WEBDAV_URL: ${{ inputs.webdav_url }}
+        WEBDAV_USERNAME: ${{ inputs.username }}
+        WEBDAV_PASSWORD: ${{ inputs.password }}
+        MOUNT_POINT: ${{ inputs.mount_point }}
       run: |
-        sudo apt update && sudo apt install -y davfs2
-        sudo mkdir -p ${{ inputs.mount_point }}
-        echo "${{ inputs.webdav_url }} ${{ inputs.username }} ${{ inputs.password }}" | sudo tee /etc/davfs2/secrets > /dev/null
+        set -euo pipefail
+
+        sudo apt update
+        sudo apt install -y davfs2 fuse3 rclone
+        sudo mkdir -p "${MOUNT_POINT}"
+
+        printf '%s %s %s\n' "${WEBDAV_URL}" "${WEBDAV_USERNAME}" "${WEBDAV_PASSWORD}" | sudo tee /etc/davfs2/secrets > /dev/null
         sudo chmod 600 /etc/davfs2/secrets
+
+        sudo sed -i '/^use_locks /d' /etc/davfs2/davfs2.conf
         echo "use_locks 0" | sudo tee -a /etc/davfs2/davfs2.conf > /dev/null
-        sudo mount -t davfs ${{ inputs.webdav_url }} ${{ inputs.mount_point }}
-        echo "WebDAV 已挂载到 ${{ inputs.mount_point }}"
+
+        if sudo mount -t davfs "${WEBDAV_URL}" "${MOUNT_POINT}" && ls -la "${MOUNT_POINT}" > /dev/null; then
+          echo "WebDAV 已通过 davfs2 挂载到 ${MOUNT_POINT}"
+          exit 0
+        fi
+
+        echo "davfs2 挂载不可读，切换为 rclone WebDAV 挂载"
+        sudo umount "${MOUNT_POINT}" 2>/dev/null || true
+        sudo mkdir -p /root/.config/rclone
+        RCLONE_OBSCURED_PASS="$(rclone obscure "${WEBDAV_PASSWORD}")"
+        {
+          echo "[koofr]"
+          echo "type = webdav"
+          echo "url = ${WEBDAV_URL}"
+          echo "vendor = other"
+          echo "user = ${WEBDAV_USERNAME}"
+          echo "pass = ${RCLONE_OBSCURED_PASS}"
+        } | sudo tee /root/.config/rclone/rclone.conf > /dev/null
+
+        sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf
+        if ! grep -q '^user_allow_other' /etc/fuse.conf; then
+          echo "user_allow_other" | sudo tee -a /etc/fuse.conf > /dev/null
+        fi
+        sudo rclone mount koofr: "${MOUNT_POINT}" --config /root/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes --daemon
+        sleep 3
+        ls -la "${MOUNT_POINT}" > /dev/null
+        echo "WebDAV 已通过 rclone 挂载到 ${MOUNT_POINT}"
 
     - name: 安装 davfs2 (macOS)
       if: ${{ inputs.platform == 'macos' }}

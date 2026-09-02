@@ -64,10 +64,16 @@ jobs:
         run: |
           sleep 5
           curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' > ssh_address.txt
-          echo "🔹 你的 SSH 地址：" $(cat ssh_address.txt)
+          SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+          SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+          SSH_IP=$(python3 -c 'import socket, sys; print(socket.gethostbyname(sys.argv[1]))' "${SSH_HOST}")
+          echo "🔹 你的 SSH 地址：ssh root@${SSH_IP} -p ${SSH_PORT}"
 
       - name: 输出 SSH 连接方式
         run: |
           echo "🔹 使用以下命令连接到服务器："
-          echo " ssh root@$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#') -p $(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#') "
+          SSH_HOST=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\1#')
+          SSH_PORT=$(cat ssh_address.txt | sed -E 's#tcp://([^:]+):([0-9]+)#\2#')
+          SSH_IP=$(python3 -c 'import socket, sys; print(socket.gethostbyname(sys.argv[1]))' "${SSH_HOST}")
+          echo " ssh root@${SSH_IP} -p ${SSH_PORT} "
           sleep 5h   
